@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petrer Explora</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-omnivore/leaflet-omnivore.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+</head>
+
+<style>
+/* Estilos generales */
+* {
+    margin: 0; /* Elimina el margen por defecto de todos los elementos */
+    padding: 0; /* Elimina el relleno por defecto de todos los elementos */
+    box-sizing: border-box; /* Incluye el padding y el borde dentro del tamaño total del elemento */
+}
+
+body {
+    font-family: 'Roboto', sans-serif; /* Aplica la fuente Roboto a todo el cuerpo del documento */
+    display: flex; /* Utiliza el modelo flexbox para el cuerpo */
+    flex-direction: column; /* Los hijos del cuerpo se organizan en una columna */
+    min-height: 100vh; /* La altura mínima del cuerpo es la altura de la ventana gráfica */
+    background-color: #1a1a1a; /* Color de fondo oscuro */
+    color: #f0f0f0; /* Color de texto claro */
+}
+
+header {
+    background-color: black; /* Fondo negro para el encabezado */
+    padding: 1rem 2rem; /* Espaciado interno de 1rem arriba y abajo, 2rem a los lados */
+    display: flex; /* Modelo flexbox para el encabezado */
+    justify-content: space-between; /* Distribuye los elementos con espacio entre ellos */
+    align-items: center; /* Alinea los elementos al centro verticalmente */
+    border-bottom: 2px solid #00ff00; /* Borde inferior verde */
+}
+
+.logo {
+    font-size: 1.8rem; /* Tamaño de fuente grande para el logo */
+    font-family: 'Press Start 2P', cursive;
+}
+
+.social-media {
+    display: flex; /* Modelo flexbox para la sección de redes sociales */
+    gap: 1rem; /* Espacio entre los elementos */
+}
+
+.social-media img {
+    width: 30px; /* Ancho de las imágenes de redes sociales */
+    height: 30px; /* Altura de las imágenes de redes sociales */
+    cursor: pointer; /* Cambia el cursor al pasar sobre las imágenes */
+    transition: transform 0.3s; /* Transición suave para la transformación */
+}
+
+.social-media img:hover {
+    transform: scale(1.2); /* Aumenta el tamaño de la imagen al pasar el ratón */
+}
+
+/* Píxeles animados de fondo */
+.pixel-container {
+    position: fixed; /* Posición fija en la pantalla */
+    top: 0;
+    left: 0;
+    width: 100vw; /* Ocupa todo el ancho de la ventana */
+    height: 100vh; /* Ocupa todo el alto de la ventana */
+    z-index: -1; /* Coloca el contenedor detrás de otros elementos */
+    pointer-events: none; /* Hace que el contenedor no interfiera con eventos del ratón */
+}
+
+.pixel {
+    position: absolute; /* Posición absoluta dentro del contenedor */
+    width: 3px; /* Ancho del píxel */
+    height: 3px; /* Altura del píxel */
+    background: lime; /* Color de fondo verde lima */
+    opacity: 0; /* Transparencia inicial */
+    animation: explode 3s ease-out infinite; /* Animación de explosión infinita */
+}
+
+@keyframes explode {
+    0% {
+        opacity: 1; /* Comienza visible */
+        transform: scale(1) translate(0, 0); /* Tamaño y posición inicial */
+    }
+    100% {
+        opacity: 0; /* Termina invisible */
+        transform: scale(5) translate(var(--x), var(--y)); /* Aumenta de tamaño y se mueve */
+    }
+}
+
+main {
+    flex: 1; /* Toma el espacio restante disponible */
+    padding: 2rem 1rem; /* Espaciado interno */
+    display: flex; /* Modelo flexbox */
+    flex-direction: column; /* Organiza los hijos en una columna */
+    gap: 2rem; /* Espacio entre los hijos */
+    align-items: center; /* Alinea los elementos al centro horizontalmente */
+}
+
+section {
+    background: rgba(0, 0, 0, 0.8); /* Fondo negro con transparencia */
+    padding: 2rem; /* Espaciado interno */
+    border-radius: 15px; /* Esquinas redondeadas */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.5); /* Sombra del cuadro */
+    width: 100%; /* Ocupa todo el ancho disponible */
+    max-width: 800px; /* Ancho máximo */
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Transiciones suaves para transformación y sombra */
+    border: 2px solid #00ff00; /* Borde verde */
+    margin-bottom: 20px; /* Espacio inferior */
+}
+
+section:hover {
+    transform: translateY(-10px); /* Mueve la sección hacia arriba al pasar el ratón */
+    box-shadow: 0 12px 16px rgba(0, 0, 0, 0.7); /* Aumenta la sombra al pasar el ratón */
+}
+
+section .content {
+    display: flex; /* Modelo flexbox */
+    flex-direction: column; /* Organiza los hijos en una columna */
+    align-items: center; /* Alinea los elementos al centro horizontalmente */
+    text-align: center; /* Texto centrado */
+    gap: 1rem; /* Espacio entre los elementos */
+}
+
+section .content img {
+    width: 100%; /* Ancho máximo del 100% */
+    max-width: 400px; /* Ancho máximo de 400px */
+    border-radius: 10px; /* Esquinas redondeadas */
+    border: 2px solid #00ff00; /* Borde verde */
+    margin-bottom: 1rem; /* Espacio inferior */
+}
+
+h2 {
+    color: #00ff00; /* Color de texto verde */
+    font-size: 1.3rem; /* Tamaño de fuente */
+    margin-bottom: 0.9rem; /* Espacio inferior */
+    padding-bottom: 0.9rem; /* Espaciado interno inferior */
+    text-align: center; /* Texto centrado */
+    font-family: 'Press Start 2P', cursive;
+      /* Espaciado entre líneas (interlineado) */
+    line-height: 1.5;     /* Ajusta la altura de la línea, puedes usar valores como 1.5, 2, etc. */
+}
+
+h3 {
+    font-size: 1rem; /* Tamaño de fuente */
+    margin-bottom: 0.5rem; /* Espacio inferior */
+    padding: 1rem; /* Espaciado interno */
+    font-family: 'Press Start 2P', cursive;
+      /* Espaciado entre líneas (interlineado) */
+    line-height: 1.5;     /* Ajusta la altura de la línea, puedes usar valores como 1.5, 2, etc. */
+}
+
+p {
+    line-height: 1.6; /* Altura de línea */
+    color: #c0c0c0; /* Color de texto gris claro */
+    margin-bottom: 1rem; /* Espacio inferior */
+}
+/*parpadeo para caracteres*/
+@keyframes parpadeo {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.parpadeante {
+    animation: parpadeo 3s infinite;
+}
+
+footer {
+    background-color: #000; /* Fondo negro */
+    color: #00ff00; /* Color de texto verde */
+    font-family: 'Press Start 2P', cursive; /* Fuente especial */
+    text-align: center; /* Texto centrado */
+    padding: 1rem; /* Espaciado interno */
+    border-top: 2px solid #00ff00; /* Borde superior verde */
+}
+
+.showcase {
+    /*min-height: 300px;*/
+    /*width: 100vw;*/
+    display: flex; /* Modelo flexbox */
+    flex-direction: column; /* Organiza los hijos en una columna */
+    justify-content: center; /* Centra los hijos verticalmente */
+    align-items: center; /* Alinea los elementos al centro horizontalmente */
+    font-family: 'Press Start 2P', cursive; /* Fuente especial */
+    background-size: auto; /* Tamaño de fondo automático */
+    text-align: center; /* Texto centrado */
+    padding: 2rem; /* Espaciado interno */
+    margin: 0; /* Sin margen */
+    
+}
+
+.fondo {
+    background: url("https://www.escapadarural.com/blog/wp-content/uploads/1920px-Panoramica_del_valle_de_Xorret_de_Cati_16222076080-1024x455.jpg.webp") no-repeat center center; /* Fondo de imagen centrada sin repetición */
+}
+
+.showcase h1 {
+    font-size: 1.6em; /* Tamaño de fuente */
+    color: #6e0372; /* Color de texto */
+    margin-bottom: 0px; /* Sin espacio inferior */
+	text-shadow: 0 0 5px rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 255, 255, 0.6), 0 0 15px rgba(255, 255, 255, 0.4);/* Texto iluminado */
+
+
+
+    
+}
+
+.showcase p {
+    font-size: 1em; /* Tamaño de fuente */
+    color: #ffe1ff; /* Color de texto */
+    
+}
+
+.section5 {
+    display: flex; /* Modelo flexbox */
+    flex-direction: column; /* Organiza los hijos en una columna */
+    align-items: center; /* Alinea los elementos al centro horizontalmente */
+    margin-bottom: 20px; /* Espacio inferior */
+}
+
+.section5 img {
+    width: 100%; /* Ancho máximo del 100% */
+    max-width: 300px; /* Ancho máximo de 300px */
+    margin: 0 20px; /* Espacio horizontal */
+    border: 2px solid #00ff00; /* Borde verde */
+    border-radius: 10px; /* Esquinas redondeadas */
+    margin-bottom: 20px;
+}
+
+.text-content {
+    flex: 1; /* Toma el espacio restante disponible */
+    text-align: center; /* Texto centrado */
+}
+
+nav ul {
+    list-style-type: none; /* Sin estilo de lista */
+    margin: 0; /* Sin margen */
+    padding: 0; /* Sin relleno */
+    display: flex; /* Modelo flexbox */
+    justify-content: space-around; /* Espacio alrededor de los elementos */
+    background-color:  rgba(0, 0, 0, 0.8); /* Fondo oscuro */
+}
+
+nav ul li {
+    margin: 0; /* Sin margen */
+    
+}
+
+nav ul li a {
+    display: block; /* Elemento en bloque */
+    color: #FFF; /* Color del texto */
+    text-align: center; /* Texto centrado */
+    font-family: 'Press Start 2P', cursive; /* Fuente*/
+    font-size: 0.9rem;
+    padding: 10px 20px; /* Espaciado interno */
+    text-decoration: none; /* Sin subrayado */
+    transition: background-color 0.3s, color 0.3s; /* Transición suave para color de fondo y texto */
+}
+
+nav ul li a:hover {
+    background-color: #555; /* Fondo gris al hacer hover */
+    color: #CB11E4; /* Color dorado al hacer hover */
+    cursor: pointer; /* Cursor estándar de puntero */
+}
+/*buscador */
+.fixed-img {
+    position: fixed;
+    bottom: 20px; /* Ajusta el espacio desde el borde inferior */
+    right: 20px;  /* Ajusta el espacio desde el borde derecho */
+    z-index: 1000; /* Asegura que esté encima de otros elementos */
+}
+
+.fixed-img img {
+    width: 50px; /* Ajusta el tamaño de la imagen */
+    height: auto;
+    cursor: pointer; /* Cambia el cursor al pasar sobre la imagen */
+}
+.fixed-img:hover {
+    transform: translateY(-10px); /* Mueve la sección hacia arriba al pasar el ratón */
+    box-shadow: 0 12px 16px rgba(0, 0, 0, 0.7); /* Aumenta la sombra al pasar el ratón */
+}
+
+.dropdown-menu {
+    display: none; /* Oculta el menú por defecto */
+    position: absolute;
+    bottom: 60px; /* Ajusta para que el menú esté encima de la imagen */
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    z-index: 1001; /* Asegura que el menú esté encima de otros elementos */
+}
+
+/* Estilos para los enlaces dentro del menú desplegable */
+.dropdown-menu a {
+    display: block;  /* Asegura que los enlaces se muestren como bloques, ocupando todo el ancho disponible */
+    padding: 10px;   /* Añade un espacio interno de 10px alrededor del contenido del enlace */
+    text-decoration: none;  /* Elimina el subrayado del texto del enlace */
+    color: #FFF;  /* Establece el color del texto del enlace */
+    transition: all 0.3s ease;  /* Añade una transición suave para todos los cambios de estilo */
+    font-family: 'Press Start 2P', cursive;  /* Establece la fuente para los enlaces */
+    border-radius: 5px;  /* Añade bordes redondeados a los enlaces */
+    font-size: 0.6rem; /* Tamaño de fuente */
+    border: 2px solid #00ff00; /* Borde verde */
+}
+
+/* Estilos para los enlaces cuando el usuario pasa el ratón por encima */
+.dropdown-menu a:hover {
+    background-color: #f0f0f0;  /* Cambia el color de fondo del enlace al pasar el ratón por encima */
+    color: #007BFF;  /* Cambia el color del texto al pasar el ratón por encima */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Añade una sombra para darle un efecto de elevación */
+}
+
+/* Estilos para el menú desplegable */
+.dropdown-menu {
+    background:#000 ;  /* Añade un degradado suave al fondo del menú */
+    border: 2px solid #00ff00;  /* Añade un borde sutil alrededor del menú */
+    border-radius: 8px;  /* Bordes redondeados para el menú */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);  /* Sombra suave para dar un efecto flotante */
+    padding: 10px;  /* Añade un espacio interno al menú */
+}
+.dropdown-menu button{
+    background:#000
+}
+
+/* color de los hiper enlaces*/
+.hiper {color:#DDDD05;
+	
+	}
+    #map {
+            height: 400px; /* Ajusta el tamaño del mapa */
+            width: 100%;
+            border: 2px solid #00ff00;  /* Añade un borde sutil alrededor del menú */
+            border-radius: 8px;  /* Bordes redondeados para el menú */
+        }
+
+        /* Estilo para el marcador */
+        .custom-icon {
+            background: url('../../img/guia\ trasparente.png') no-repeat center center;
+            background-size: cover;
+            width: 32px;
+            height: 32px;
+            border-radius: 5%;
+        }
+
+        /* Estilo para el popup del marcador */
+        .leaflet-popup-content {
+            background-color: rgb(255, 255, 255);
+            color: #000000;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            
+        }
+
+        /* Estilo para el contenedor del mapa */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+
+        /* Asegúrate de que la imagen del marcador no sea demasiado grande */
+        .leaflet-popup-tip {
+            display: none;
+        }
+        /*BOTON GOOGLEMAPS*/
+        .gps {
+        display: inline-block;
+        padding: 5px 5px;
+        background-color: rgba(0, 0, 0, 0.8); /* Fondo negro transparente */
+        color: white; /* Texto blanco */
+        border: 2px solid #00ff00; /* Borde verde */
+        border-radius: 5px; /* Bordes redondeados */
+        text-decoration: none; /* Sin subrayado */
+        transition: background-color 0.3s, color 0.3s; /* Transiciones suaves */
+        text-align: center;
+        }
+
+        .gps h3 {
+            margin: 0; /* Sin margen */
+        }
+
+        .gps:hover {
+            background-color: #ccc;; /* Fondo blanco al hacer hover */
+            color: #007BFF; /* Texto azul al hacer hover */
+        }
+
+/* Estilo adicional para el menú en dispositivos móviles */
+@media (max-width: 600px) {
+    .logo {
+        font-size: 1.5rem; /* Tamaño de fuente menor para el logo */
+    }
+
+    h2 {
+        font-size: 1.4rem; /* Tamaño de fuente menor */
+    }
+
+    main {
+        padding: 1rem; /* Menor espaciado interno */
+    }
+
+    section {
+        padding: 1rem; /* Menor espaciado interno */
+    }
+
+    .social-media {
+        gap: 0.5rem; /* Menor espacio entre elementos */
+    }
+
+    .social-media img {
+        width: 25px; /* Menor ancho de imágenes de redes sociales */
+        height: 25px; /* Menor altura de imágenes de redes sociales */
+    }
+
+    nav ul {
+        flex-direction: column; /* Organiza los elementos en una columna */
+    }
+
+    nav ul li {
+        text-align: center; /* Texto centrado */
+    }
+
+    nav ul li a {
+        padding: 10px; /* Menor espaciado interno */
+    }
+}
+
+@media (min-width: 768px) {
+    .showcase h1 {
+        font-size: 4em; /* Mayor tamaño de fuente */
+    }
+
+    .showcase p {
+        font-size: 1.5em; /* Mayor tamaño de fuente */
+    }
+
+    .section5 {
+        flex-direction: row; /* Organiza los elementos en una fila */
+        text-align: left; /* Texto alineado a la izquierda */
+    }
+
+    .section5:nth-child(even) {
+        flex-direction: row-reverse; /* Organiza los elementos en una fila inversa */
+    }
+
+    .text-content {
+        text-align: left; /* Texto alineado a la izquierda */
+    }
+}
+
+
+</style>
+
+
+<body>
+    <div class="pixel-container"></div>
+    <header>
+        <nav>
+            <div class="logo">Petrer Explora</div>
+            </nav>
+            <div class="social-media">
+                <a href="https://www.facebook.com" target="_blank">
+                    <img src="../../img/facebook-logo.png" alt="Facebook">
+                </a>
+                <a href="https://www.instagram.com" target="_blank">
+                    <img src="../../img/INSTAGRAMER.png" alt="Instagram">
+                </a>
+            </div>
+        
+    </header>
+
+    <main>
+
+   
+    
+   <section  class="fondo">   
+    <div class="showcase">
+        <h1>Erkunde den Xorret de Catí</h1>
+        <p>Entdecke, warum diese Ecke von Alicante ein Paradies für Skorpione ist<span class="parpadeante">.</span></p>
+    </div>
+</section>
+    <section>
+        <nav>
+            <ul>
+                <li><a href="#xorret de cati">Xorret de Catí</a></li>
+                <li><a href="#ruta">Route</a></li>
+                <li><a href="#consejos">Tipps</a></li>
+                <li><a href="#alacran">Skorpion</a></li>
+                <li><a href="#curiosidades">Kuriositäten</a></li>
+            </ul>
+        </nav>
+    </section>  
+    <section id="xorret de cati" class="content">
+        <h2>Warum ist der Xorret de Catí in Alicante ein gutes Ökosystem für Skorpione<span class="parpadeante">?</span></h2>
+        <p>Xorret de Catí ist ein Naturgebiet in Petrer, Alicante, das sich durch seine beeindruckende Schönheit und seinen ökologischen Wert auszeichnet. Eingebettet in die geschützte Landschaft der Sierras de Maigmó und El Cid, ist dieses Berggebiet umgeben von den majestätischen Gipfeln der Sierras del Maigmó und del Fraile, die über 1.200 Meter hoch sind und spektakuläre Felsklippen und -grate bieten.</p>
+
+        <p>Das Erholungsgebiet Xorret de Catí liegt in einer privilegierten Umgebung, umgeben von der Sierra del Maigmó, den Rasos de Cati, der Crestera de Fraile und der Sierra del Cid. Die vorherrschende Vegetation umfasst Pinienwälder und eine Vielzahl von aromatischen Pflanzen wie Thymian, Rosmarin, Pebrella und Katzenschwanz.</p>
+        
+        <p>Wenn du ein Naturfreund bist und dich für nachtaktive Kreaturen begeisterst, wird es dich sicherlich interessieren, warum der <a class="hiper" href="https://alicantenatura.es/espacios_naturales/xorret-de-cati/" target="_blank">Xorret de Catí</a> in der Provinz Alicante ein idealer Ort für Skorpione ist. Dieser magische Ort bietet nicht nur beeindruckende Landschaften, sondern ist auch ein perfektes Zuhause für diese faszinierenden Spinnentiere.<br> <center> <p>Lasst uns herausfinden, warum!</p> </center></p>
+        
+        <div class="section5">
+            <img alt="Mittelmeerklima" src="https://alicantenatura.es/wp-content/uploads/2021/02/valle-Cati.jpg" />
+            <div class="text-content">
+                <h3>Günstige Klimatische Bedingungen</h3>
+                <h4>Mittelmeerklima</h4>
+                <p>Der Xorret de Catí liegt in einer Region mit Mittelmeerklima, was heiße und trockene Sommer sowie milde Winter bedeutet. Skorpione, wie der <a class="hiper" href="https://es.wikipedia.org/wiki/Buthus_occitanus" target="_blank">*Buthus occitanus*</a>, lieben dieses warme und trockene Klima. Dies ist einer der Hauptgründe, warum sie in diesem Gebiet gedeihen.</p>
+                <h4>Niedrige Luftfeuchtigkeit</h4>
+                <p>Zudem ist die niedrige Luftfeuchtigkeit ideal für Skorpione. Sie bevorzugen trockene Umgebungen, da dies ihnen hilft, Austrocknungsprobleme zu vermeiden und das Risiko von Pilzinfektionen zu reduzieren.</p>
+            </div>
+        </div>
+        
+        <div class="section5">
+            <img alt="Habitatstruktur" src="https://www.bunko.pet/__export/1673395290151/sites/debate/img/2023/01/10/fluorescencia-escorpiones_2.jpg_554688468.jpg" />
+            <div class="text-content">
+                <h3>Habitatstruktur</h3>
+                <h4>Felsen und Risse</h4>
+                <p>Der Xorret de Catí ist voller Felsen, Risse und Spalten, die ideale natürliche Verstecke für Skorpione darstellen. Diese Verstecke bieten ihnen Schutz während des Tages, wenn sie am anfälligsten für Raubtiere und extreme Wetterbedingungen sind.</p>
+                <h4>Sandige und Steinige Böden</h4>
+                <p>Die Böden des Gebiets sind perfekt für Skorpione. Sandige Böden erleichtern es den Skorpionen, zu graben und sich zu bewegen, und die steinigen Bereiche bieten zahlreiche Versteckmöglichkeiten.</p>
+            </div>
+        </div>
+        
+        <div class="section5">
+            <img alt="Verfügbarkeit von Beute" src="https://img.rtve.es/imagenes/escorpiones-alacranes-otros-bichos-peligrosos/1668190072465.jpg" />
+            <div class="text-content">
+                <h3>Verfügbarkeit von Beute</h3>
+                <h4>Reichtum an Insekten</h4>
+                <p>Der Pflanzenreichtum im Xorret de Catí zieht viele Insekten an, die die Hauptnahrungsquelle für Skorpione darstellen. Ein ständiger Überfluss an Beute stellt sicher, dass die Skorpione immer etwas zu fressen haben.</p>
+                <h4>Biodiversität</h4>
+                <p>Das mediterrane Ökosystem des Xorret de Catí ist sehr vielfältig, was ein ausgewogenes Umfeld schafft, in dem die Skorpione zusammen mit anderen Arten gedeihen können.</p>
+            </div>
+        </div>
+        
+        <div class="section5">
+            <img alt="Schutz und Zuflucht" src="https://alicantenatura.es/wp-content/uploads/2021/02/CIMG0600.jpg" />
+            <div class="text-content">
+                <h3>Schutz und Zuflucht</h3>
+                <h4>Lokale Mikroklimata</h4>
+                <p>Die geografischen Merkmale des Xorret de Catí schaffen Mikroklimata, die während der Hitze des Tages kühlere Rückzugsorte bieten können, was für Skorpione von Vorteil ist.</p>
+                <h4>Dichte Vegetation</h4>
+                <p>Die Vegetation im Gebiet bietet zusätzlichen Schutz und hilft, die Bodenfeuchtigkeit an bestimmten Stellen zu erhalten, was Mikrohabitate schafft, in denen die Skorpione Wasser und Schatten finden können.</p>
+            </div>
+        </div>
+        
+        <br id="ruta">
+        <h2><span class="parpadeante">_</span> Route <span class="parpadeante">_</span></h2>
+        <div id="map"></div> <br>
+
+        <div class="section5">
+            <img alt="route" src="https://www.milesdecaminos.com/wp-content/uploads/2023/07/IMG20230720085721_01-scaled.jpg" />
+            <div class="text-content">
+                <h3></h3>
+                <p><strong>Distanz:</strong> 1.2km </p>
+                <p><strong>Geschätzte Dauer:</strong>  60 min</p>
+                <p><strong>Empfohlene Zeit:</strong> ab 22:30 Uhr </p>
+                <p><strong>Beste Jahreszeit:</strong> Juli, August</p>
+                <p><strong>Schwierigkeitsgrad:</strong> niedrig</p>
+                <p><strong>Steigung:</strong> 1%</p>
+            </div>
+        </div>
+
+        <div class="section5">
+            <img alt="route" src="https://1.bp.blogspot.com/-0yanpHx6a3I/V5cthb6qbEI/AAAAAAABglQ/7co1iYv5JkkJM5pLzhyZTRn7eWxnhAfTACLcB/s1600/20160725_084103.jpg" />
+            <div class="text-content">
+                <h3>Beschreibung der Route</h3>
+                <p><strong>Breite und sichere Wege:</strong> Perfekt für die Ängstlichen. Wenn dich die Angst vor Gefahren vom Erkunden abhält, bieten unsere Wege ein magisches Erlebnis ohne Überraschungen und Aufregung.</p>
+                <p>Erlebe das Abenteuer ohne Drama!</p>
+            </div>
+        </div>
+        <center><a href="https://www.google.com/maps/dir//xorret+de+cat%C3%AD+google+maps/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0xd63d22c4d1b6995:0x4491a384f4c19008?sa=X&ved=1t:3061&ictx=111" class="gps" target="_blank">
+            <h3>ANFAHRT</h3>
+        </a></center>
+ <br id="consejos">
+ <h2>Tipps für die Alacran-Route im Xorret de Catí<span class="parpadeante">.</span></h2>
+ <div class="section5">
+     <img alt="Geeignetes Schuhwerk" src="../../img/botas.jpg" />
+     <div class="text-content">
+         <h3>Bekleidung</h3>
+         <p><strong>Geeignetes Schuhwerk</strong> 
+         ist entscheidend, um die Erfahrung sicher und komfortabel zu genießen. Wanderschuhe oder Sportschuhe mit guter Traktion werden empfohlen, um ein Ausrutschen zu vermeiden und einen guten Halt auf unebenem Gelände zu gewährleisten.</p>
+         <p><strong>Dauer:</strong> Dieser Tipp gilt für die gesamte Route.</p>
+     </div>
+ </div>
+ <div class="section5">
+     <img alt="Taschenlampe" src="../../img/LUZ.jpg" />
+     <div class="text-content">
+         <h3>Zubehör</h3>
+         <p><strong>Taschenlampe</strong> 
+         Eine Taschenlampe ist nützlich, um sich durch die Gegend zu bewegen; jedoch wird nicht empfohlen, sie während der Beobachtung der Skorpione zu verwenden, damit die Erfahrung authentischer und magischer unter dem Nachthimmel ist.</p>
+         <p><strong>Dauer:</strong> Unverzichtbar auf unmarkierten Wegen.</p>
+     </div>
+ </div>
+ 
+ <div class="section5">
+     <img alt="Schwarzlichtlampe" src="../../img/luzUV.jpg" />
+     <div class="text-content">
+         <h3>Zubehör</h3>
+         <p><strong>Schwarzlichtlampe</strong> 
+         Eine Schwarzlichtlampe ist unverzichtbar, um Skorpione zu beobachten, da diese Tiere unter UV-Licht leuchten. Stellen Sie sicher, dass Sie eine solche Lampe mitnehmen, um die Skorpione in ihrer ganzen Pracht zu sehen.</p>
+         <p><strong>Dauer:</strong> Besonders nützlich während der nächtlichen Teile der Route.</p>
+     </div>
+ </div>
+ <div class="section5">
+     <img alt="Lebensraum respektieren" src="../../img/guia.png" />
+     <div class="text-content">
+         <h3>Bewusstsein</h3>
+         <p><strong>Vermeiden Sie die Störung des Lebensraums</strong> 
+         Es ist wichtig, den natürlichen Lebensraum der Skorpione zu respektieren. Berühren oder bewegen Sie keine Steine oder Baumstämme und halten Sie einen angemessenen Abstand. Denken Sie daran, dass wir als Gäste in ihrem Zuhause sind und unseren Einfluss minimieren müssen.</p>
+         <p><strong>Dauer:</strong> Zu jeder Zeit.</p>
+     </div>
+ </div>
+ <br id="alacran">
+ <h2><span class="parpadeante">¿</span> Skorpione<span class="parpadeante">?</span></h2>
+ <center><p>Wir werden ihre Merkmale, ihr Verhalten und Sicherheitsmaßnahmen erkunden, um mit diesen faszinierenden, aber manchmal gefährlichen Spinnentieren zusammenzuleben.</p></center>
+ 
+ <div class="section5">
+     <img alt="Beschreibung" src="https://www.gardentech.com/-/media/project/oneweb/gardentech/images/pest-id/updated-bug-post/scorpion/scorpion-under-uv.jpg" />
+     <div class="text-content">
+         <h3>Beschreibung:</h3>
+         <p><strong>Größe:</strong> Erwachsene können zwischen 6 und 8 cm lang werden.</p>
+         <p><strong>Farbe:</strong> Ihre Farbe variiert von blassem Gelb bis hellbraun, was ihnen hilft, sich gut in ihrer Umgebung zu tarnen.</p>
+         <p><strong>Unterscheidungsmerkmale:</strong> Sie haben ein Paar Vorderzangen, einen segmentierten Körper und einen Schwanz mit einem giftigen Stachel am Ende.</p>
+     </div>
+ </div>
+ <div class="section5">
+     <img alt="Verhalten" src="https://i0.wp.com/wokii.com/wp-content/uploads/2022/01/shutterstock-585293789.jpg?resize=1024%2C576&ssl=1" />
+     <div class="text-content">
+         <h3>Verhalten:</h3>
+         <p><strong>Nocturnal:</strong> Sie sind nachts aktiver, was ihre Beobachtung bei Nachtführungen ideal macht.</p>
+         <p><strong>Ernährung:</strong> Sie ernähren sich hauptsächlich von Insekten und Spinnen. Sie benutzen ihre Zangen, um ihre Beute zu fangen und ihren Stachel, um Gift zu injizieren.</p>
+         <p><strong>Fortpflanzung:</strong> Die Weibchen tragen die Eier in ihrem Körper und gebären lebende Jungtiere, die sich bis zur ersten Häutung auf dem Rücken der Mutter aufhalten.</p>
+     </div>
+ </div>
+ 
+ <div class="section5">
+     <img alt="Gift" src="https://terrartropoda.wordpress.com/wp-content/uploads/2013/07/buthus_occitanus_01_484.jpg" />
+     <div class="text-content">
+         <h3>Gift:</h3>
+         <p><strong>Toxizität:</strong> Das Gift des <em>Buthus occitanus</em> ist mäßig giftig für Menschen und verursacht Schmerzen, Schwellungen und in seltenen Fällen schwerere Symptome. Stiche sind in der Regel nicht tödlich, erfordern aber medizinische Aufmerksamkeit, insbesondere bei Kindern und Allergikern.</p>
+     </div>
+ </div>
+ 
+ <div class="section5">
+     <img alt="Schutz" src="https://i0.wp.com/wokii.com/wp-content/uploads/2022/01/shutterstock-1180875340.jpg?resize=1024%2C576&ssl=1" />
+     <div class="text-content">
+         <h3>Schutz:</h3>
+         <p><strong>Erhaltungszustand:</strong> Sie gelten nicht als vom Aussterben bedroht, spielen jedoch wie alle Spinnentiere eine wichtige Rolle im Ökosystem, indem sie die Insektenpopulation kontrollieren.</p>
+     </div>
+ </div>
+ 
+ <h2>Unterschiede zwischen männlichen und weiblichen Skorpionen<span class="parpadeante">.</span></h2>
+ 
+ <div class="section5">
+     <img alt="Körpergröße" src="https://static4.olympus-lifescience.com/modules/imageresizer/16b/bba/10c258b4d6/902x645p2429x1735.jpg" />
+     <div class="text-content">
+         <h3>Körpergröße</h3>
+         <p><strong>Männchen:</strong> Bei vielen Skorpionarten sind die Männchen schlanker und länglicher als die Weibchen.</p>
+         <p><strong>Weibchen:</strong> Die Weibchen haben in der Regel einen breiteren und robusteren Körper.</p>
+     </div>
+ </div>
+ 
+ <div class="section5">
+     <img alt="Kämme" src="https://periergeia.org/wp-content/uploads/2019/09/Imagen1.png" />
+     <div class="text-content">
+         <h3>Kämme (Pectines)</h3>
+         <p><strong>Männchen:</strong> Die Männchen haben größere Kämme (sensorische Organe in Form eines Kamms auf der Unterseite des Körpers) mit mehr Zähnen (kleine Borsten). Diese Kämme werden verwendet, um Pheromone und Vibrationen im Boden zu erkennen.</p>
+         <p><strong>Weibchen:</strong> Die Weibchen haben kleinere Kämme mit weniger Zähnen im Vergleich zu den Männchen.</p>
+     </div>
+ </div>
+ 
+ <div class="section5">
+     <img alt="Schwanz" src="https://periergeia.org/wp-content/uploads/2019/01/Imagen1.png" />
+     <div class="text-content">
+         <h3>Schwanz (Metasoma)</h3>
+         <p><strong>Männchen:</strong> Der Schwanz des Männchens (das Metasoma) ist tendenziell länger und dünner. Bei einigen Arten ist das fünfte Segment des Schwanzes bei den Männchen länger.</p>
+         <p><strong>Weibchen:</strong> Der Schwanz des Weibchens ist normalerweise kürzer und robuster.</p>
+     </div>
+ </div>
+ 
+ <div class="section5">
+     <img alt="Palpen" src="https://www.ngenespanol.com/wp-content/uploads/2022/12/escorpion-del-desierto-resumen.jpeg" />
+     <div class="text-content">
+         <h3>Palpen (Zangen)</h3>
+         <p><strong>Männchen:</strong> Bei bestimmten Arten haben die Männchen längere und dünnere Zangen, die ihnen während des Balzverhaltens und im Kampf mit anderen Männchen helfen.</p>
+         <p><strong>Weibchen:</strong> Die Weibchen haben in der Regel kürzere und stärkere Zangen.</p>
+     </div>
+ </div>
+ 
+ <div class="section5">
+     <img alt="Balzverhalten" src="https://t1.ea.ltmcdn.com/es/posts/1/5/2/rituales_de_apareamiento_de_al
+ 
+ acranes_o_escorpiones_25251_0_600.webp" />
+     <div class="text-content">
+         <h3>Balzverhalten</h3>
+         <p><strong>Männchen:</strong> Die Männchen führen ein komplexes Balzritual durch, das das Ergreifen der Zangen des Weibchens und einen „Tanz“ beinhaltet, bei dem sie das Weibchen hin und her bewegen.</p>
+         <p><strong>Weibchen:</strong> Die Weibchen nehmen an diesem Balzritual teil, initiieren es jedoch nicht.</p>
+     </div>
+ </div>
+ 
+ <br id="curiosidades">
+ <h2>Interessante Fakten über Skorpione<span class="parpadeante">.</span></h2>
+ 
+ <div class="section5">
+     <img alt="Uralte Überlebende" src="https://arqueologiamexicana.mx/sites/default/files/styles/arq1200x600/public/alacranes_2.png?itok=4HW2IvUe" />
+     <div class="text-content">
+         <h3>Uralte Überlebende</h3>
+         <p>Skorpione gehören zu den ältesten Tieren der Erde. Es wird angenommen, dass sie seit mehr als 400 Millionen Jahren existieren, was bedeutet, dass sie Massensterben überlebt haben und sich seit ihren prähistorischen Ursprüngen kaum verändert haben.</p>
+     </div>
+ </div>
+ 
+ <div class="section5">
+     <img alt="Extreme Widerstandsfähigkeit" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYPWJy_WMsUv_Q7NFO0ENsKezn9hQlfuoKX3mpXtSJLjaEpXH8zd_6Jecikh2vZAapE5E&usqp=CAU" />
+     <div class="text-content">
+         <h3>Extreme Widerstandsfähigkeit</h3>
+         <p>Skorpione sind unglaublich widerstandsfähig gegenüber extremen Bedingungen. Sie können monatelang ohne Nahrung überleben und extremen Temperaturen standhalten, die von der Kälte der Wüste bis zur sengenden Hitze reichen.</p>
+     </div>
+ </div>
+ 
+ <div class="section5">
+     <img alt="Nachtjäger" src="https://ichef.bbci.co.uk/ace/ws/624/amz/worldservice/live/assets/images/2014/01/15/140115122728_escorpion__624x351_getty.jpg.webp" />
+     <div class="text-content">
+         <h3>Nachtjäger</h3>
+         <p>Sie sind hauptsächlich nachtaktiv, was bedeutet, dass sie nachts jagen und aktiver sind. Diese Anpassung hilft ihnen, die extreme Hitze des Tages zu vermeiden und die Kühle der Nacht zu nutzen, um Insekten und andere kleine Beutetiere zu jagen.</p>
+     </div>
+ </div>
+ <div class="section5">
+     <img alt="Gift mit Zweck" src="https://img2.rtve.es/im/6734363/?w=900" />
+     <div class="text-content">
+         <h3>Gift mit Zweck</h3>
+         <p>Das Gift der Skorpione dient nicht nur zur Verteidigung und Jagd, sondern hat auch medizinische Eigenschaften. Wissenschaftler untersuchen Bestandteile des Skorpiongiftes, um Behandlungen für Krankheiten wie Krebs zu entwickeln und wirksamere Schmerzmittel zu schaffen.</p>
+     </div>
+ </div>
+ 
+ <div class="section5">
+     <img alt="Langlebigkeit in der Welt der Spinnentiere" src="https://i0.wp.com/wokii.com/wp-content/uploads/2022/01/shutterstock-1773011870.jpg?w=1280&ssl=1" />
+     <div class="text-content">
+         <h3>Langlebigkeit in der Welt der Spinnentiere</h3>
+         <p>Im Vergleich zu anderen Spinnentieren haben Skorpione eine relativ lange Lebensdauer. Einige Arten können zwischen 4 und 25 Jahren leben, abhängig von den Umweltbedingungen und ihrem Lebensraum.</p>
+     </div>
+ </div>
+ 
+ <div class="section5">
+     <img alt="Schützende Elternschaft" src="https://biobalears.wordpress.com/wp-content/uploads/2016/02/madre-con-crc3adas.jpg" />
+     <div class="text-content">
+         <h3>Schützende Elternschaft</h3>
+         <p>Nach der Geburt lebender Jungtiere trägt die Mutter ihre Jungen auf ihrem Rücken, bis sie ihre erste Häutung hinter sich haben. In dieser Zeit sind die Jungen verletzlich und vollständig auf den mütterlichen Schutz angewiesen.</p>
+     </div>
+ </div>
+ 
+ <div class="section5">
+     <img alt="Anpassung an Dehydration" src="https://alicantenatura.es/wp-content/uploads/2021/02/Cresteria_1-1.jpg" />
+     <div class="text-content">
+         <h3>Anpassung an Dehydration</h3>
+         <p>Skorpione haben die Fähigkeit, ihre Stoffwechselrate zu senken und den Wasserverlust zu begrenzen, was ihnen ermöglicht, in trockenen und wüstenartigen Umgebungen zu überleben, in denen andere Tiere nicht überleben könnten.</p>
+     </div>
+ </div>
+ 
+ <p>Nach all den Details, die ich mit Ihnen über die faszinierende Route zur Beobachtung von Skorpionen im Xorret de Catí geteilt habe, ist es nun Zeit, sich zu verabschieden. Es war mir eine Freude, Sie auf dieser Reise voller Geheimnisse und nächtlicher Entdeckungen zu begleiten. Die Erfahrung, diese unglaublichen Wesen in ihrem natürlichen Lebensraum zu sehen, ist etwas, das man nicht so leicht vergisst.</p>
+ 
+ <p>Ich möchte Sie einladen, nicht nur beim Lesen zu bleiben. Gehen Sie raus und erleben Sie das Abenteuer! Die Natur hat immer etwas Neues zu bieten, und der Xorret de Catí ist der perfekte Ort, um auf einzigartige Weise mit ihr in Kontakt zu treten. Packen Sie Ihren Rucksack, bereiten Sie Ihre UV-Taschenlampe vor und kommen Sie, um die geheime Welt der Skorpione zu entdecken. Ich versichere Ihnen, es wird eine unvergessliche Erfahrung.</p>
+ 
+ <h3><center><span class="parpadeante">¡</span> Wir sehen uns auf dem Weg <span class="parpadeante">!</span><center></h3>
+    </main>
+ <!-- Imagen fija con el menú desplegable  -->
+ <div class="fixed-img">
+    <img src="../../img/brujula.png" alt="Klappbild" id="toggleButton">
+    <div id="dropdownMenu" class="dropdown-menu">
+        <a href="#top">Zum Anfang</a>
+        <a href="#ruta">Route</a>
+        <a href="#consejos">Tipps</a>
+        <a href="#alacran">Skorpione</a>
+        <a href="#curiosidades">Kuriositäten</a>
+        <a href="../home_freetour_de.html"><span>Zurück</span></a>
+        <button id="botonSilencio">
+            <img src="../../img/volumen-icono.png" alt="Musik Stummschalten">
+        </button>
+        <audio id="musica" src="../../audio/pixel.mp3" autoplay loop></audio>
+    </div>
+</div>
+       
+    <footer>
+    <div class="language-selector">
+            <a  href="../../es/blog_freetour_es/blog_alacran.html ">
+                <img src="../../img/es.png" alt="español" title="Español"  >
+            </a>
+            <a  href="../../va/blog_freetour_va/blog_alacran_va.html ">
+                <img src="../../img/va.png" alt="Valencia" title="Valenciano">
+            </a>    
+            <a  href="../../en/blog_freetour_en/blog_alacran_en.html  ">
+                <img src="../../img/en.png" alt="Inglés" title="Inglés">
+            </a>
+            <a  href="../../de/blog_freetour_de/blog_alacran_de.html  ">    
+                <img src="../../img/de.png" alt="Alemán" title="Alemán">
+            </a>
+            </div>
+           
+        
+        <p>&copy; 2024 Petrer Explora</p>
+    </footer>
+    
+    <script>
+        //fondo
+    const numPixels = 10; // Número de píxeles que se generarán
+
+        for (let i = 0; i < numPixels; i++) {
+            // Crear un elemento div para cada píxel
+            const pixel = document.createElement('div');
+            pixel.classList.add('pixel'); // Añadir la clase 'pixel' al elemento
+            document.querySelector('.pixel-container').appendChild(pixel); // Añadir el píxel al contenedor de píxeles
+
+            // Posición inicial aleatoria en la pantalla
+            const startX = Math.random() * window.innerWidth;
+            const startY = Math.random() * window.innerHeight;
+
+            // Desplazamiento aleatorio para la animación
+            const endX = (Math.random() - 0.5) * 200; // Desplazamiento horizontal
+            const endY = (Math.random() - 0.5) * 200; // Desplazamiento vertical
+
+            // Establecer la posición inicial del píxel
+            pixel.style.left = `${startX}px`;
+            pixel.style.top = `${startY}px`;
+
+            // Establecer variables CSS personalizadas para el desplazamiento
+            pixel.style.setProperty('--x', `${endX}px`);
+            pixel.style.setProperty('--y', `${endY}px`);
+
+            // Añadir un retraso aleatorio a la animación
+            pixel.style.animationDelay = `${Math.random() * 3}s`;
+        }
+            //musica
+        const botonSilencio = document.getElementById('botonSilencio');
+        const musica = document.getElementById('musica');
+        const volumenIcono = '../../img/volumen-icono.png'; // Ruta de la imagen de volumen
+        const silencioIcono = '../../img/silencio-icono.png'; // Ruta de la imagen de silencio
+
+        botonSilencio.addEventListener('click', function() {
+            if (musica.paused) {
+                musica.play(); // Reproducir la música si está pausada
+                botonSilencio.querySelector('img').src = volumenIcono;
+            } else {
+                musica.pause(); // Pausar la música si está reproduciéndose
+                botonSilencio.querySelector('img').src = silencioIcono;
+            }
+        });
+        
+        // buscador para navegar
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleButton = document.getElementById('toggleButton');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+
+    toggleButton.addEventListener('click', () => {
+        // Alterna la visibilidad del menú desplegable
+        if (dropdownMenu.style.display === 'block') {
+            dropdownMenu.style.display = 'none';
+        } else {
+            dropdownMenu.style.display = 'block';
+        }
+    });
+
+    // Cierra el menú si se hace clic fuera de él
+    window.addEventListener('click', (event) => {
+        if (!toggleButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+            dropdownMenu.style.display = 'none';
+        }
+    });
+});
+        //LIBRERIAS
+   
+    
+        // Crear el mapa y centrarlo
+        var map = L.map('map').setView([38.513, -0.676], 15);
+
+        // Cargar la capa de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Crear un icono personalizado para el marcador
+        var customIcon = L.divIcon({
+            className: 'custom-icon',
+            iconSize: [32, 32]
+        });
+
+        // Lista de coordenadas
+        var coordinates = [
+            [38.50885187349147, -0.6772767292248638],
+            [38.50891653177661, -0.6770681880135843],
+            [38.50903078054457, -0.6769393559932824],
+            [38.50914959950165, -0.6768887577642158],
+            [38.50942882659514, -0.6768469615903738],
+            [38.50972039363053, -0.6767797200557335],
+            [38.50989022076159, -0.676752125071296],
+            [38.50997470878553, -0.6767666368126946],
+            [38.51004953401663, -0.6768148825253195],
+            [38.51009874530019, -0.6768948850685597],
+            [38.51012902978276, -0.6769645895373766],
+            [38.5101684109009, -0.6771911937909481],
+            [38.5101854825775, -0.6772528303924308],
+            [38.5103253472687, -0.6774534420119271],
+            [38.51038997889994, -0.6775331856241906],
+            [38.51040937667132, -0.6776005121106865],
+            [38.51042175113975, -0.6776530329240948],
+            [38.51043790755965, -0.6777577574594984],
+            [38.51053239923294, -0.6780491188198268],
+            [38.51060566121576, -0.6782402622816852],
+            [38.51063634755005, -0.6782902912388122],
+            [38.51079099595708, -0.6784129643418679],
+            [38.51090488444374, -0.6784630058991759],
+            [38.5110053785716, -0.6784444891857033],
+            [38.51118384939861, -0.6783379205147655],
+            [38.51137396985879, -0.6781601316354169],
+            [38.51157630092887, -0.6780294678641241],
+            [38.51178014122834, -0.677941774137234],
+            [38.51199313520875, -0.6778890600059639],
+            [38.51220092971722, -0.6778734348125248],
+            [38.51230479292757, -0.6778794776146735],
+            [38.51247738696789, -0.677941300510756],
+            [38.51266801154465, -0.678004545000821],
+            [38.51282939210985, -0.6780180272588709],
+            [38.51292558297045, -0.6779902205240762],
+            [38.51309560275516, -0.6779353759917506],
+            [38.51321583089263, -0.6778414383406528],
+            [38.51329128683741, -0.6777287852328506],
+            [38.5133788591689, -0.6775506948645882],
+            [38.51345182478136, -0.6773655573798754],
+            [38.5135695208479, -0.6771317085889739],
+            [38.51367572290936, -0.6769746745204752],
+            [38.51374902993847, -0.6768858764541752],
+            [38.51387247824891, -0.6768081319664276],
+            [38.51398783407576, -0.6767989648774897],
+            [38.51419496299658, -0.6768202308929383],
+            [38.51458521026104, -0.676956274653685],
+            [38.51590625892417, -0.6772314525050205],
+            [38.51610635125402, -0.6773172261911342],
+            [38.5163423802838, -0.6773431608956482],
+            [38.51664773418542, -0.6773306149261749],
+            [38.51680587790188, -0.6772674342745544],
+            [38.516903080928, -0.6772010283161323],
+            [38.51702813456518, -0.6771568398746663],
+            [38.51711238437788, -0.6771613862016612],
+            [38.51717727800556, -0.6771777436798532],
+            [38.51728342069637, -0.6772480184094087]
+        ];
+
+        // Agregar la línea poligonal
+        L.polyline(coordinates, {color: 'blue'}).addTo(map);
+
+        // Agregar marcadores con la imagen personalizada
+        L.marker(coordinates[0], {icon: customIcon}).addTo(map)
+            .bindPopup('RETURN<span class="parpadeante">.</span>', {className: 'popup-text'})
+            .openPopup();
+        L.marker(coordinates[coordinates.length - 1], {icon: customIcon}).addTo(map)
+            .bindPopup('START<span class="parpadeante">.</span>', {className: 'popup-text'});
+   
+    </script>
+     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+</body>
+</html>

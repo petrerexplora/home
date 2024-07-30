@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petrer Explora</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-omnivore/leaflet-omnivore.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+</head>
+
+<style>
+/* Estilos generales */
+* {
+    margin: 0; /* Elimina el margen por defecto de todos los elementos */
+    padding: 0; /* Elimina el relleno por defecto de todos los elementos */
+    box-sizing: border-box; /* Incluye el padding y el borde dentro del tamaño total del elemento */
+}
+
+body {
+    font-family: 'Roboto', sans-serif; /* Aplica la fuente Roboto a todo el cuerpo del documento */
+    display: flex; /* Utiliza el modelo flexbox para el cuerpo */
+    flex-direction: column; /* Los hijos del cuerpo se organizan en una columna */
+    min-height: 100vh; /* La altura mínima del cuerpo es la altura de la ventana gráfica */
+    background-color: #1a1a1a; /* Color de fondo oscuro */
+    color: #f0f0f0; /* Color de texto claro */
+}
+
+header {
+    background-color: black; /* Fondo negro para el encabezado */
+    padding: 1rem 2rem; /* Espaciado interno de 1rem arriba y abajo, 2rem a los lados */
+    display: flex; /* Modelo flexbox para el encabezado */
+    justify-content: space-between; /* Distribuye los elementos con espacio entre ellos */
+    align-items: center; /* Alinea los elementos al centro verticalmente */
+    border-bottom: 2px solid #00ff00; /* Borde inferior verde */
+}
+
+.logo {
+    font-size: 1.8rem; /* Tamaño de fuente grande para el logo */
+    font-family: 'Press Start 2P', cursive;
+}
+
+.social-media {
+    display: flex; /* Modelo flexbox para la sección de redes sociales */
+    gap: 1rem; /* Espacio entre los elementos */
+}
+
+.social-media img {
+    width: 30px; /* Ancho de las imágenes de redes sociales */
+    height: 30px; /* Altura de las imágenes de redes sociales */
+    cursor: pointer; /* Cambia el cursor al pasar sobre las imágenes */
+    transition: transform 0.3s; /* Transición suave para la transformación */
+}
+
+.social-media img:hover {
+    transform: scale(1.2); /* Aumenta el tamaño de la imagen al pasar el ratón */
+}
+
+/* Píxeles animados de fondo */
+.pixel-container {
+    position: fixed; /* Posición fija en la pantalla */
+    top: 0;
+    left: 0;
+    width: 100vw; /* Ocupa todo el ancho de la ventana */
+    height: 100vh; /* Ocupa todo el alto de la ventana */
+    z-index: -1; /* Coloca el contenedor detrás de otros elementos */
+    pointer-events: none; /* Hace que el contenedor no interfiera con eventos del ratón */
+}
+
+.pixel {
+    position: absolute; /* Posición absoluta dentro del contenedor */
+    width: 3px; /* Ancho del píxel */
+    height: 3px; /* Altura del píxel */
+    background: lime; /* Color de fondo verde lima */
+    opacity: 0; /* Transparencia inicial */
+    animation: explode 3s ease-out infinite; /* Animación de explosión infinita */
+}
+
+@keyframes explode {
+    0% {
+        opacity: 1; /* Comienza visible */
+        transform: scale(1) translate(0, 0); /* Tamaño y posición inicial */
+    }
+    100% {
+        opacity: 0; /* Termina invisible */
+        transform: scale(5) translate(var(--x), var(--y)); /* Aumenta de tamaño y se mueve */
+    }
+}
+
+main {
+    flex: 1; /* Toma el espacio restante disponible */
+    padding: 2rem 1rem; /* Espaciado interno */
+    display: flex; /* Modelo flexbox */
+    flex-direction: column; /* Organiza los hijos en una columna */
+    gap: 2rem; /* Espacio entre los hijos */
+    align-items: center; /* Alinea los elementos al centro horizontalmente */
+}
+
+section {
+    background: rgba(0, 0, 0, 0.8); /* Fondo negro con transparencia */
+    padding: 2rem; /* Espaciado interno */
+    border-radius: 15px; /* Esquinas redondeadas */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.5); /* Sombra del cuadro */
+    width: 100%; /* Ocupa todo el ancho disponible */
+    max-width: 800px; /* Ancho máximo */
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Transiciones suaves para transformación y sombra */
+    border: 2px solid #00ff00; /* Borde verde */
+    margin-bottom: 20px; /* Espacio inferior */
+}
+
+section:hover {
+    transform: translateY(-10px); /* Mueve la sección hacia arriba al pasar el ratón */
+    box-shadow: 0 12px 16px rgba(0, 0, 0, 0.7); /* Aumenta la sombra al pasar el ratón */
+}
+
+section .content {
+    display: flex; /* Modelo flexbox */
+    flex-direction: column; /* Organiza los hijos en una columna */
+    align-items: center; /* Alinea los elementos al centro horizontalmente */
+    text-align: center; /* Texto centrado */
+    gap: 1rem; /* Espacio entre los elementos */
+}
+
+section .content img {
+    width: 100%; /* Ancho máximo del 100% */
+    max-width: 400px; /* Ancho máximo de 400px */
+    border-radius: 10px; /* Esquinas redondeadas */
+    border: 2px solid #00ff00; /* Borde verde */
+    margin-bottom: 1rem; /* Espacio inferior */
+}
+
+h2 {
+    color: #00ff00; /* Color de texto verde */
+    font-size: 1.3rem; /* Tamaño de fuente */
+    margin-bottom: 0.9rem; /* Espacio inferior */
+    padding-bottom: 0.9rem; /* Espaciado interno inferior */
+    text-align: center; /* Texto centrado */
+    font-family: 'Press Start 2P', cursive;
+      /* Espaciado entre líneas (interlineado) */
+    line-height: 1.5;     /* Ajusta la altura de la línea, puedes usar valores como 1.5, 2, etc. */
+}
+
+h3 {
+    font-size: 1rem; /* Tamaño de fuente */
+    margin-bottom: 0.5rem; /* Espacio inferior */
+    padding: 1rem; /* Espaciado interno */
+    font-family: 'Press Start 2P', cursive;
+      /* Espaciado entre líneas (interlineado) */
+    line-height: 1.5;     /* Ajusta la altura de la línea, puedes usar valores como 1.5, 2, etc. */
+}
+
+p {
+    line-height: 1.6; /* Altura de línea */
+    color: #c0c0c0; /* Color de texto gris claro */
+    margin-bottom: 1rem; /* Espacio inferior */
+}
+/*parpadeo para caracteres*/
+@keyframes parpadeo {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.parpadeante {
+    animation: parpadeo 3s infinite;
+}
+
+footer {
+    background-color: #000; /* Fondo negro */
+    color: #00ff00; /* Color de texto verde */
+    font-family: 'Press Start 2P', cursive; /* Fuente especial */
+    text-align: center; /* Texto centrado */
+    padding: 1rem; /* Espaciado interno */
+    border-top: 2px solid #00ff00; /* Borde superior verde */
+}
+
+.showcase {
+    /*min-height: 300px;*/
+    /*width: 100vw;*/
+    display: flex; /* Modelo flexbox */
+    flex-direction: column; /* Organiza los hijos en una columna */
+    justify-content: center; /* Centra los hijos verticalmente */
+    align-items: center; /* Alinea los elementos al centro horizontalmente */
+    font-family: 'Press Start 2P', cursive; /* Fuente especial */
+    background-size: auto; /* Tamaño de fondo automático */
+    text-align: center; /* Texto centrado */
+    padding: 2rem; /* Espaciado interno */
+    margin: 0; /* Sin margen */
+    
+}
+
+.fondo {
+    background: url("https://www.escapadarural.com/blog/wp-content/uploads/1920px-Panoramica_del_valle_de_Xorret_de_Cati_16222076080-1024x455.jpg.webp") no-repeat center center; /* Fondo de imagen centrada sin repetición */
+}
+
+.showcase h1 {
+    font-size: 1.6em; /* Tamaño de fuente */
+    color: #6e0372; /* Color de texto */
+    margin-bottom: 0px; /* Sin espacio inferior */
+	text-shadow: 0 0 5px rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 255, 255, 0.6), 0 0 15px rgba(255, 255, 255, 0.4);/* Texto iluminado */
+
+
+
+    
+}
+
+.showcase p {
+    font-size: 1em; /* Tamaño de fuente */
+    color: #ffe1ff; /* Color de texto */
+    
+}
+
+.section5 {
+    display: flex; /* Modelo flexbox */
+    flex-direction: column; /* Organiza los hijos en una columna */
+    align-items: center; /* Alinea los elementos al centro horizontalmente */
+    margin-bottom: 20px; /* Espacio inferior */
+}
+
+.section5 img {
+    width: 100%; /* Ancho máximo del 100% */
+    max-width: 300px; /* Ancho máximo de 300px */
+    margin: 0 20px; /* Espacio horizontal */
+    border: 2px solid #00ff00; /* Borde verde */
+    border-radius: 10px; /* Esquinas redondeadas */
+    margin-bottom: 20px;
+}
+
+.text-content {
+    flex: 1; /* Toma el espacio restante disponible */
+    text-align: center; /* Texto centrado */
+}
+
+nav ul {
+    list-style-type: none; /* Sin estilo de lista */
+    margin: 0; /* Sin margen */
+    padding: 0; /* Sin relleno */
+    display: flex; /* Modelo flexbox */
+    justify-content: space-around; /* Espacio alrededor de los elementos */
+    background-color:  rgba(0, 0, 0, 0.8); /* Fondo oscuro */
+}
+
+nav ul li {
+    margin: 0; /* Sin margen */
+    
+}
+
+nav ul li a {
+    display: block; /* Elemento en bloque */
+    color: #FFF; /* Color del texto */
+    text-align: center; /* Texto centrado */
+    font-family: 'Press Start 2P', cursive; /* Fuente*/
+    font-size: 0.9rem;
+    padding: 10px 20px; /* Espaciado interno */
+    text-decoration: none; /* Sin subrayado */
+    transition: background-color 0.3s, color 0.3s; /* Transición suave para color de fondo y texto */
+}
+
+nav ul li a:hover {
+    background-color: #555; /* Fondo gris al hacer hover */
+    color: #CB11E4; /* Color dorado al hacer hover */
+    cursor: pointer; /* Cursor estándar de puntero */
+}
+/*buscador */
+.fixed-img {
+    position: fixed;
+    bottom: 20px; /* Ajusta el espacio desde el borde inferior */
+    right: 20px;  /* Ajusta el espacio desde el borde derecho */
+    z-index: 1000; /* Asegura que esté encima de otros elementos */
+}
+
+.fixed-img img {
+    width: 50px; /* Ajusta el tamaño de la imagen */
+    height: auto;
+    cursor: pointer; /* Cambia el cursor al pasar sobre la imagen */
+}
+.fixed-img:hover {
+    transform: translateY(-10px); /* Mueve la sección hacia arriba al pasar el ratón */
+    box-shadow: 0 12px 16px rgba(0, 0, 0, 0.7); /* Aumenta la sombra al pasar el ratón */
+}
+
+.dropdown-menu {
+    display: none; /* Oculta el menú por defecto */
+    position: absolute;
+    bottom: 60px; /* Ajusta para que el menú esté encima de la imagen */
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    z-index: 1001; /* Asegura que el menú esté encima de otros elementos */
+}
+
+/* Estilos para los enlaces dentro del menú desplegable */
+.dropdown-menu a {
+    display: block;  /* Asegura que los enlaces se muestren como bloques, ocupando todo el ancho disponible */
+    padding: 10px;   /* Añade un espacio interno de 10px alrededor del contenido del enlace */
+    text-decoration: none;  /* Elimina el subrayado del texto del enlace */
+    color: #FFF;  /* Establece el color del texto del enlace */
+    transition: all 0.3s ease;  /* Añade una transición suave para todos los cambios de estilo */
+    font-family: 'Press Start 2P', cursive;  /* Establece la fuente para los enlaces */
+    border-radius: 5px;  /* Añade bordes redondeados a los enlaces */
+    font-size: 0.6rem; /* Tamaño de fuente */
+    border: 2px solid #00ff00; /* Borde verde */
+}
+
+/* Estilos para los enlaces cuando el usuario pasa el ratón por encima */
+.dropdown-menu a:hover {
+    background-color: #f0f0f0;  /* Cambia el color de fondo del enlace al pasar el ratón por encima */
+    color: #007BFF;  /* Cambia el color del texto al pasar el ratón por encima */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Añade una sombra para darle un efecto de elevación */
+}
+
+/* Estilos para el menú desplegable */
+.dropdown-menu {
+    background:#000 ;  /* Añade un degradado suave al fondo del menú */
+    border: 2px solid #00ff00;  /* Añade un borde sutil alrededor del menú */
+    border-radius: 8px;  /* Bordes redondeados para el menú */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);  /* Sombra suave para dar un efecto flotante */
+    padding: 10px;  /* Añade un espacio interno al menú */
+}
+.dropdown-menu button{
+    background:#000
+}
+
+/* color de los hiper enlaces*/
+.hiper {color:#DDDD05;
+	
+	}
+    #map {
+            height: 400px; /* Ajusta el tamaño del mapa */
+            width: 100%;
+            border: 2px solid #00ff00;  /* Añade un borde sutil alrededor del menú */
+            border-radius: 8px;  /* Bordes redondeados para el menú */
+        }
+
+        /* Estilo para el marcador */
+        .custom-icon {
+            background: url('../../img/guia\ trasparente.png') no-repeat center center;
+            background-size: cover;
+            width: 32px;
+            height: 32px;
+            border-radius: 5%;
+        }
+
+        /* Estilo para el popup del marcador */
+        .leaflet-popup-content {
+            background-color: rgb(255, 255, 255);
+            color: #000000;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            
+        }
+
+        /* Estilo para el contenedor del mapa */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+
+        /* Asegúrate de que la imagen del marcador no sea demasiado grande */
+        .leaflet-popup-tip {
+            display: none;
+        }
+        /*BOTON GOOGLEMAPS*/
+        .gps {
+        display: inline-block;
+        padding: 5px 5px;
+        background-color: rgba(0, 0, 0, 0.8); /* Fondo negro transparente */
+        color: white; /* Texto blanco */
+        border: 2px solid #00ff00; /* Borde verde */
+        border-radius: 5px; /* Bordes redondeados */
+        text-decoration: none; /* Sin subrayado */
+        transition: background-color 0.3s, color 0.3s; /* Transiciones suaves */
+        text-align: center;
+        }
+
+        .gps h3 {
+            margin: 0; /* Sin margen */
+        }
+
+        .gps:hover {
+            background-color: #ccc;; /* Fondo blanco al hacer hover */
+            color: #007BFF; /* Texto azul al hacer hover */
+        }
+
+/* Estilo adicional para el menú en dispositivos móviles */
+@media (max-width: 600px) {
+    .logo {
+        font-size: 1.5rem; /* Tamaño de fuente menor para el logo */
+    }
+
+    h2 {
+        font-size: 1.4rem; /* Tamaño de fuente menor */
+    }
+
+    main {
+        padding: 1rem; /* Menor espaciado interno */
+    }
+
+    section {
+        padding: 1rem; /* Menor espaciado interno */
+    }
+
+    .social-media {
+        gap: 0.5rem; /* Menor espacio entre elementos */
+    }
+
+    .social-media img {
+        width: 25px; /* Menor ancho de imágenes de redes sociales */
+        height: 25px; /* Menor altura de imágenes de redes sociales */
+    }
+
+    nav ul {
+        flex-direction: column; /* Organiza los elementos en una columna */
+    }
+
+    nav ul li {
+        text-align: center; /* Texto centrado */
+    }
+
+    nav ul li a {
+        padding: 10px; /* Menor espaciado interno */
+    }
+}
+
+@media (min-width: 768px) {
+    .showcase h1 {
+        font-size: 4em; /* Mayor tamaño de fuente */
+    }
+
+    .showcase p {
+        font-size: 1.5em; /* Mayor tamaño de fuente */
+    }
+
+    .section5 {
+        flex-direction: row; /* Organiza los elementos en una fila */
+        text-align: left; /* Texto alineado a la izquierda */
+    }
+
+    .section5:nth-child(even) {
+        flex-direction: row-reverse; /* Organiza los elementos en una fila inversa */
+    }
+
+    .text-content {
+        text-align: left; /* Texto alineado a la izquierda */
+    }
+}
+
+
+</style>
+
+
+<body>
+    <div class="pixel-container"></div>
+    <header>
+        <nav>
+            <div class="logo">Petrer Explora</div>
+            </nav>
+            <div class="social-media">
+                <a href="https://www.facebook.com" target="_blank">
+                    <img src="../../img/facebook-logo.png" alt="Facebook">
+                </a>
+                <a href="https://www.instagram.com" target="_blank">
+                    <img src="../../img/INSTAGRAMER.png" alt="Instagram">
+                </a>
+            </div>
+        
+    </header>
+
+    <main>
+
+   
+    
+   <section  class="fondo">   
+     <div class="showcase">
+            <h1>Explora el Xorret de Catí</h1>
+            <p>Descubre por qué este rincón de Alicante es un paraíso para los alacranes<span class="parpadeante">.</span></p>
+        </div>
+    </section>
+      <section>
+      <nav>
+    <ul>
+        <li><a href="#xorret de cati">Xorret de cati</a></li>
+        <li><a href="#ruta">ruta</a></li>
+        <li><a href="#consejos">consejos</a></li>
+        <li><a href="#alacran">Alacran</a></li>
+        <li><a href="#curiosidades">curiosidades </a></li>
+        
+    </ul>
+</nav>
+</section >  
+         <section  id="xorret de cati" class="content">
+            <h2 >¿Por Qué el Xorret de Catí en Alicante es un Buen Ecosistema para los Alacranes <span class="parpadeante">?</span> </h2>
+            <p>Xorret de Catí es un área natural ubicada en Petrer, Alicante, destacada por su impresionante belleza y valor ambiental. Integrada en el Paisaje Protegido de las Sierras de Maigmó y El Cid, esta zona montañosa está rodeada por las majestuosas cumbres de las Sierras del Maigmó y del Fraile, que superan los 1.200 metros de altitud, ofreciendo cresterías y cortados rocosos espectaculares.
+
+El área recreativa de Xorret de Catí se encuentra en un entorno privilegiado, rodeado por la Sierra del Maigmó, los Rasos de Cati, la Crestera de Fraile y la Sierra del Cid. La vegetación predominante incluye bosques de pino carrasco y una variedad de plantas aromáticas como tomillo, romero, pebrella y rabo de gato. </p>
+ 
+            
+            <p>Si eres un amante de la naturaleza y te fascinan las criaturas nocturnas, seguro te interesará saber por qué el <a class=hiper href="https://alicantenatura.es/espacios_naturales/xorret-de-cati/" target="_blank">Xorret de Catí</a>, en la provincia de Alicante, es un lugar ideal para los alacranes. Este lugar mágico no solo ofrece paisajes impresionantes, sino que también es un hogar perfecto para estos arácnidos tan intrigantes.<br> <center> <p>¡Vamos a descubrir por qué!</p> </center>
+
+<div class="section5">
+    <img alt="Clima Mediterráneo" src="https://alicantenatura.es/wp-content/uploads/2021/02/valle-Cati.jpg" />
+    <div class="text-content">
+        <h3>Condiciones Climáticas Favorables</h3>
+        <h4>Clima Mediterráneo</h4>
+        <p>El Xorret de Catí se encuentra en una región con clima mediterráneo, lo que significa veranos calurosos y secos e inviernos suaves. Los alacranes, como el <a  class=hiper href="https://es.wikipedia.org/wiki/Buthus_occitanus" target="_blank">*Buthus occitanus*</a>, adoran este tipo de clima cálido y seco. Esta es una de las razones principales por las que prosperan en esta área.</p>
+        <h4>Baja Humedad</h4>
+        <p>Además, la baja humedad es perfecta para los alacranes. Prefieren ambientes secos ya que les ayuda a evitar problemas de deshidratación y reduce el riesgo de infecciones por hongos.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="Estructura del Hábitat" src="https://www.bunko.pet/__export/1673395290151/sites/debate/img/2023/01/10/fluorescencia-escorpiones_2.jpg_554688468.jpg" />
+    <div class="text-content">
+        <h3>Estructura del Hábitat</h3>
+        <h4>Rocas y Grietas</h4>
+        <p>El Xorret de Catí está lleno de rocas, grietas y hendiduras, que son refugios naturales ideales para los alacranes. Estos escondites les proporcionan protección durante el día, cuando son más vulnerables a los depredadores y a las condiciones climáticas extremas.</p>
+        <h4>Suelos Arenosos y Pedregosos</h4>
+        <p>Los suelos del área son perfectos para los alacranes. Los suelos arenosos facilitan que los alacranes puedan cavar y moverse, y las áreas pedregosas les proporcionan numerosos lugares para esconderse.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="Disponibilidad de Presas" src="https://img.rtve.es/imagenes/escorpiones-alacranes-otros-bichos-peligrosos/1668190072465.jpg" />
+    <div class="text-content">
+        <h3>Disponibilidad de Presas</h3>
+        <h4>Abundancia de Insectos</h4>
+        <p>La riqueza de flora en el Xorret de Catí atrae a muchos insectos, que son la principal fuente de alimento para los alacranes. Una abundancia constante de presas asegura que los alacranes siempre tengan algo para comer.</p>
+        <h4>Biodiversidad</h4>
+        <p>El ecosistema mediterráneo del Xorret de Catí es muy diverso, creando un entorno equilibrado donde los alacranes pueden prosperar junto con otras especies.</p>
+    </div>
+</div>
+<div class="section5">
+    <img alt="Refugio y Protección" src="https://alicantenatura.es/wp-content/uploads/2021/02/CIMG0600.jpg" />
+    <div class="text-content">
+        <h3>Refugio y Protección</h3>
+        <h4>Microclimas Locales</h4>
+        <p>Las características geográficas del Xorret de Catí crean microclimas que pueden ofrecer refugios más frescos durante el calor del día, lo cual es beneficioso para los alacranes.</p>
+        <h4>Vegetación Densa</h4>
+        <p>La vegetación en el área proporciona cobertura adicional y ayuda a mantener la humedad del suelo en ciertos puntos, ofreciendo microhábitats donde los alacranes pueden encontrar agua y sombra.</p>
+    </div>
+</div>
+<br id="ruta">
+<h2 ><span class="parpadeante">_</span> Ruta <span class="parpadeante">_</span></h2>
+<div id="map"></div> <br>
+
+<div class="section5">
+    
+    <img alt="ruta" src="https://www.milesdecaminos.com/wp-content/uploads/2023/07/IMG20230720085721_01-scaled.jpg" />
+    <div class="text-content">
+        <h3></h3>
+        <p><strong>Diatancia:</strong> 1.2km </p>
+        <p><strong>Duracion estimada:</strong>  60 min</p>
+        <p><strong>horario recomendado:</strong>  apartir de 22:30 </p>
+        <p><strong>epoca ideal:</strong> julio, agosto</p>
+        <p><strong>Dificultad:</strong> baja</p>
+        <p><strong>desnivel:</strong> 1%</p>
+    </div>
+</div>
+
+
+<div class="section5">
+    <img alt="ruta" src="https://1.bp.blogspot.com/-0yanpHx6a3I/V5cthb6qbEI/AAAAAAABglQ/7co1iYv5JkkJM5pLzhyZTRn7eWxnhAfTACLcB/s1600/20160725_084103.jpg" />
+    <div class="text-content">
+        <h3>Descripcion de la ruta</h3>
+        <p><strong>Rutas Anchas y Seguras:</strong>Perfectas para los Más Miedosos. Si el miedo al peligro te impide explorar, nuestros caminos te ofrecen una experiencia mágica sin sorpresas ni sobresaltos.</p>
+    <p> ¡Vive la aventura sin el drama!</p>
+        <p><strong></strong> </p>
+    </div>
+</div>
+<center><a  href="https://www.google.com/maps/dir//xorret+de+cat%C3%AD+google+maps/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0xd63d22c4d1b6995:0x4491a384f4c19008?sa=X&ved=1t:3061&ictx=111" class="gps" target="_blank">
+    <h3>COMO LLEGAR</h3>
+</a></center>
+ <br id="consejos">
+<h2 >Consejos para la ruta del Alacran en el Xorret de Catí<span class="parpadeante">.</span></h2>
+<div class="section5">
+    <img alt="calzado adecuado" src="../../img/botas.jpg" />
+    <div class="text-content">
+        <h3>Vestimenta</h3>
+        <p><strong>Calzado Adecuado</strong> 
+        Es esencial para disfrutar de la experiencia de forma segura y cómoda. Se recomienda botas de senderismo o zapatos deportivos con buena tracción para evitar resbalones y asegurar un buen agarre en terrenos irregulares.</p>
+        <p><strong>Duración:</strong> Este consejo es válido durante todo el recorrido.</p>
+    </div>
+</div>
+<div class="section5">
+    <img alt="linterna" src="../../img/LUZ.jpg" />
+    <div class="text-content">
+        <h3>Accesorio</h3>
+        <p><strong>Linterna</strong> 
+        Una linterna será útil para desplazarnos por el paraje; sin embargo, no se recomienda usarla mientras observamos los alacranes, para que la experiencia sea más auténtica y mágica bajo el manto de la noche.</p>
+        <p><strong>Duración:</strong> Invaluable en terrenos no señalizados.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="linterna" src="../../img/luzUV.jpg" />
+    <div class="text-content">
+        <h3>Accesorio</h3>
+        <p><strong>Linterna de Luz Negra</strong> 
+        Una linterna de luz negra es imprescindible para observar a los alacranes, ya que estos animales brillan bajo la luz ultravioleta. Asegúrate de llevar una linterna de este tipo para poder ver a los alacranes en todo su esplendor.</p>
+        <p><strong>Duración:</strong> Especialmente útil durante las partes nocturnas de la ruta.</p>
+    </div>
+</div>
+<div class="section5">
+    <img alt="respetar hábitat" src="../../img/guia.png" />
+    <div class="text-content">
+        <h3>conciencia</h3>
+        <p><strong>Evitar Perturbar el Hábitat</strong> 
+        Es fundamental respetar el hábitat natural de los alacranes. No toques ni muevas piedras o troncos, y mantén una distancia prudente. Recuerda que estamos como invitados en su hogar y debemos minimizar nuestro impacto.</p>
+        <p><strong>Duración:</strong> En todo momento.</p>
+    </div>
+</div>
+<br id="alacran">
+ <h2 ><span class="parpadeante">¿ </span>Alacranes<span class="parpadeante"> ?</span></h2>
+           <center> <p>exploraremos sus características, comportamientos y medidas de seguridad para convivir con estos fascinantes pero a veces peligrosos arácnidos.</p></center>
+
+<div class="section5">
+    <img alt="Descripción" src="https://www.gardentech.com/-/media/project/oneweb/gardentech/images/pest-id/updated-bug-post/scorpion/scorpion-under-uv.jpg" />
+    <div class="text-content">
+        <h3>Descripción:</h3>
+        <p><strong>Tamaño:</strong> Los adultos pueden medir entre 6 y 8 cm de largo.</p>
+        <p><strong>Color:</strong> Su color varía del amarillo pálido al marrón claro, lo que les permite camuflarse bien en su entorno.</p>
+        <p><strong>Características Distintivas:</strong> Poseen un par de pinzas delanteras, un cuerpo segmentado y una cola con un aguijón venenoso en el extremo.</p>
+    </div>
+</div>
+<div class="section5">
+    <img alt="Comportamiento" src="https://i0.wp.com/wokii.com/wp-content/uploads/2022/01/shutterstock-585293789.jpg?resize=1024%2C576&ssl=1" />
+    <div class="text-content">
+        <h3>Comportamiento:</h3>
+        <p><strong>Nocturno:</strong> Son más activos durante la noche, lo que hace ideal su observación en tours nocturnos.</p>
+        <p><strong>Alimentación:</strong> Se alimentan principalmente de insectos y arañas. Utilizan sus pinzas para capturar a sus presas y el aguijón para inyectar veneno.</p>
+        <p><strong>Reproducción:</strong> Las hembras llevan a los huevos dentro de su cuerpo y dan a luz a crías vivas, que se suben al dorso de la madre hasta su primera muda.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="Veneno" src="https://terrartropoda.wordpress.com/wp-content/uploads/2013/07/buthus_occitanus_01_484.jpg" />
+    <div class="text-content">
+        <h3>Veneno:</h3>
+        <p><strong>Toxicidad:</strong> El veneno del <em>Buthus occitanus</em> es moderadamente tóxico para los humanos, causando dolor, hinchazón y, en casos raros, síntomas más graves. Las picaduras no suelen ser mortales, pero requieren atención médica, especialmente en niños y personas alérgicas.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="Conservación" src="https://i0.wp.com/wokii.com/wp-content/uploads/2022/01/shutterstock-1180875340.jpg?resize=1024%2C576&ssl=1" />
+    <div class="text-content">
+        <h3>Conservación:</h3>
+        <p><strong>Estado de Conservación:</strong> No se considera en peligro de extinción, pero como todos los arácnidos, desempeña un papel importante en el ecosistema controlando la población de insectos.</p>
+    </div>
+</div>
+
+<h2>Diferencias entre Machos y Hembras de Alacrán<span class="parpadeante">.</span></h2>
+
+<div class="section5">
+    <img alt="Tamaño Corporal" src="https://static4.olympus-lifescience.com/modules/imageresizer/16b/bba/10c258b4d6/902x645p2429x1735.jpg" />
+    <div class="text-content">
+        <h3>Tamaño Corporal</h3>
+        <p><strong>Machos:</strong> En muchas especies de alacranes, los machos tienden a ser más delgados y alargados en comparación con las hembras.</p>
+        <p><strong>Hembras:</strong> Las hembras suelen tener un cuerpo más ancho y robusto.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="Pectines" src="https://periergeia.org/wp-content/uploads/2019/09/Imagen1.png" />
+    <div class="text-content">
+        <h3>Pectines (Peines)</h3>
+        <p><strong>Machos:</strong> Los machos tienen pectines (órganos sensoriales en forma de peine ubicados en la parte inferior del cuerpo) más grandes y con más dientes (pequeñas cerdas). Estos pectines se utilizan para detectar feromonas y vibraciones en el suelo.</p>
+        <p><strong>Hembras:</strong> Las hembras tienen pectines más pequeños y con menos dientes en comparación con los machos.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="Cola" src="https://periergeia.org/wp-content/uploads/2019/01/Imagen1.png" />
+    <div class="text-content">
+        <h3>Cola (Metasoma)</h3>
+        <p><strong>Machos:</strong> La cola del macho (el metasoma) tiende a ser más larga y delgada. En algunas especies, el quinto segmento de la cola es más alargado en los machos.</p>
+        <p><strong>Hembras:</strong> La cola de la hembra suele ser más corta y robusta.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="Palpos" src="https://www.ngenespanol.com/wp-content/uploads/2022/12/escorpion-del-desierto-resumen.jpeg" />
+    <div class="text-content">
+        <h3>Palpos (Pinzas)</h3>
+        <p><strong>Machos:</strong> En ciertas especies, los machos tienen pinzas más largas y delgadas, lo que les ayuda durante el cortejo y en la lucha con otros machos.</p>
+        <p><strong>Hembras:</strong> Las hembras generalmente tienen pinzas más cortas y fuertes.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="Comportamiento de Cortejo" src="https://t1.ea.ltmcdn.com/es/posts/1/5/2/rituales_de_apareamiento_de_alacranes_o_escorpiones_25251_0_600.webp" />
+    <div class="text-content">
+        <h3>Comportamiento de Cortejo</h3>
+        <p><strong>Machos:</strong> Los machos realizan un ritual de cortejo complejo que incluye la sujeción de las pinzas de la hembra y una "danza" en la que mueven a la hembra hacia adelante y hacia atrás.</p>
+        <p><strong>Hembras:</strong> Las hembras participan en este ritual de cortejo pero no lo inician.</p>
+    </div>
+</div>
+
+<br id="curiosidades">
+<h2 >Datos Curiosos sobre el Alacrán<span class="parpadeante">.</span></h2>
+
+<div class="section5">
+    <img alt="Antiguos sobrevivientes" src="https://arqueologiamexicana.mx/sites/default/files/styles/arq1200x600/public/alacranes_2.png?itok=4HW2IvUe" />
+    <div class="text-content">
+        <h3>Antiguos sobrevivientes</h3>
+        <p>Los alacranes son uno de los animales más antiguos de la Tierra. Se cree que han existido durante más de 400 millones de años, lo que significa que sobrevivieron a eventos de extinción masiva y han evolucionado muy poco desde sus orígenes prehistóricos.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="Resistencia extrema" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYPWJy_WMsUv_Q7NFO0ENsKezn9hQlfuoKX3mpXtSJLjaEpXH8zd_6Jecikh2vZAapE5E&usqp=CAU" />
+    <div class="text-content">
+        <h3>Resistencia extrema</h3>
+        <p>Los alacranes son increíblemente resistentes a condiciones extremas. Pueden sobrevivir sin comida durante meses y resistir temperaturas extremas que van desde el frío del desierto hasta el calor abrasador.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="Cazadores nocturnos" src="https://ichef.bbci.co.uk/ace/ws/624/amz/worldservice/live/assets/images/2014/01/15/140115122728_escorpion__624x351_getty.jpg.webp" />
+    <div class="text-content">
+        <h3>Cazadores nocturnos</h3>
+        <p>Son principalmente nocturnos, lo que significa que cazan y son más activos durante la noche. Esta adaptación les ayuda a evitar el calor extremo del día y a aprovechar la frescura de la noche para cazar insectos y otras pequeñas presas.</p>
+    </div>
+</div>
+<div class="section5">
+    <img alt="Veneno con propósito" src="https://img2.rtve.es/im/6734363/?w=900" />
+    <div class="text-content">
+        <h3>Veneno con propósito</h3>
+        <p>El veneno del alacrán no solo sirve para defenderse y cazar, sino que también tiene propiedades médicas. Los científicos están investigando componentes del veneno del alacrán para desarrollar tratamientos para enfermedades como el cáncer y para crear analgésicos más efectivos.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="Longevidad en el mundo arácnido" src="https://i0.wp.com/wokii.com/wp-content/uploads/2022/01/shutterstock-1773011870.jpg?w=1280&ssl=1" />
+    <div class="text-content">
+        <h3>Longevidad en el mundo arácnido</h3>
+        <p>En comparación con otros arácnidos, los alacranes tienen una vida relativamente larga. Algunas especies pueden vivir entre 4 y 25 años, dependiendo de las condiciones ambientales y de su hábitat.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="Parentalidad protectora" src="https://biobalears.wordpress.com/wp-content/uploads/2016/02/madre-con-crc3adas.jpg" />
+    <div class="text-content">
+        <h3>Parentalidad protectora</h3>
+        <p>Después de dar a luz a crías vivas, la madre alacrán lleva a sus crías en su espalda hasta que se han sometido a su primera muda. Durante este tiempo, las crías son vulnerables y dependen completamente de la protección materna.</p>
+    </div>
+</div>
+
+<div class="section5">
+    <img alt="Adaptación a la deshidratación" src="https://alicantenatura.es/wp-content/uploads/2021/02/Cresteria_1-1.jpg" />
+    <div class="text-content">
+        <h3>Adaptación a la deshidratación</h3>
+        <p>Los alacranes tienen la capacidad de reducir su tasa metabólica y limitar la pérdida de agua, lo que les permite sobrevivir en ambientes áridos y desérticos donde otros animales no podrían.</p>
+    </div>
+</div>
+
+<p>Después de compartir con ustedes todos los detalles sobre la fascinante ruta para observar alacranes en el Xorret de Catí, llega el momento de despedirnos. Ha sido un placer guiarles a través de este viaje lleno de misterio y descubrimientos nocturnos. La experiencia de ver estos increíbles seres en su hábitat natural es algo que no se olvida fácilmente.</p>
+
+<p>Quiero invitarles a que no se queden solo con lo leído. ¡Salgan y vivan la aventura! La naturaleza siempre tiene algo nuevo que mostrarnos y el Xorret de Catí es el lugar perfecto para conectar con ella de una manera única. Arma tu mochila, prepara tu linterna UV y ven a descubrir el mundo secreto de los alacranes. Te aseguro que será una experiencia inolvidable.</p>
+
+<h3><center><span class="parpadeante">¡</span> Nos vemos en el camino <span class="parpadeante">!</span><center></h3>
+
+    </main>
+ <!-- Imagen fija con el menú desplegable  -->
+    <div class="fixed-img">
+        <img src="../../img/brujula.png" alt="Imagen Desplegable" id="toggleButton">
+        <div id="dropdownMenu" class="dropdown-menu">
+            <a href="#top">Ir al Inicio</a>
+            <a href="#ruta">ruta</a>
+            <a href="#consejos">consejos</a>
+            <a href="#alacran">alacranes</a>
+            <a href="#curiosidades">curiosidades</a>
+            <a href="../home_freetour_es.html"><span>volver atrás.</span></a>
+            <button id="botonSilencio">
+                <img src="../../img/volumen-icono.png" alt="Silenciar Música">
+            </button>
+            <audio id="musica" src="../../audio/pixel.mp3" autoplay loop></audio>
+        </div>
+    </div>
+</div>          
+    <footer>
+    <div class="language-selector">
+            <a  href="../../es/blog_freetour_es/blog_alacran.html ">
+                <img src="../../img/es.png" alt="español" title="Español"  >
+            </a>
+            <a  href="../../va/blog_freetour_va/blog_alacran_va.html ">
+                <img src="../../img/va.png" alt="Valencia" title="Valenciano">
+            </a>    
+            <a  href="../../en/blog_freetour_en/blog_alacran_en.html  ">
+                <img src="../../img/en.png" alt="Inglés" title="Inglés">
+            </a>
+            <a  href="../../de/blog_freetour_de/blog_alacran_de.html  ">    
+                <img src="../../img/de.png" alt="Alemán" title="Alemán">
+            </a>
+            </div>
+           
+        
+        <p>&copy; 2024 Petrer Explora</p>
+    </footer>
+    
+    <script>
+        //fondo
+    const numPixels = 10; // Número de píxeles que se generarán
+
+        for (let i = 0; i < numPixels; i++) {
+            // Crear un elemento div para cada píxel
+            const pixel = document.createElement('div');
+            pixel.classList.add('pixel'); // Añadir la clase 'pixel' al elemento
+            document.querySelector('.pixel-container').appendChild(pixel); // Añadir el píxel al contenedor de píxeles
+
+            // Posición inicial aleatoria en la pantalla
+            const startX = Math.random() * window.innerWidth;
+            const startY = Math.random() * window.innerHeight;
+
+            // Desplazamiento aleatorio para la animación
+            const endX = (Math.random() - 0.5) * 200; // Desplazamiento horizontal
+            const endY = (Math.random() - 0.5) * 200; // Desplazamiento vertical
+
+            // Establecer la posición inicial del píxel
+            pixel.style.left = `${startX}px`;
+            pixel.style.top = `${startY}px`;
+
+            // Establecer variables CSS personalizadas para el desplazamiento
+            pixel.style.setProperty('--x', `${endX}px`);
+            pixel.style.setProperty('--y', `${endY}px`);
+
+            // Añadir un retraso aleatorio a la animación
+            pixel.style.animationDelay = `${Math.random() * 3}s`;
+        }
+            //musica
+        const botonSilencio = document.getElementById('botonSilencio');
+        const musica = document.getElementById('musica');
+        const volumenIcono = '../../img/volumen-icono.png'; // Ruta de la imagen de volumen
+        const silencioIcono = '../../img/silencio-icono.png'; // Ruta de la imagen de silencio
+
+        botonSilencio.addEventListener('click', function() {
+            if (musica.paused) {
+                musica.play(); // Reproducir la música si está pausada
+                botonSilencio.querySelector('img').src = volumenIcono;
+            } else {
+                musica.pause(); // Pausar la música si está reproduciéndose
+                botonSilencio.querySelector('img').src = silencioIcono;
+            }
+        });
+        
+        // buscador para navegar
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleButton = document.getElementById('toggleButton');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+
+    toggleButton.addEventListener('click', () => {
+        // Alterna la visibilidad del menú desplegable
+        if (dropdownMenu.style.display === 'block') {
+            dropdownMenu.style.display = 'none';
+        } else {
+            dropdownMenu.style.display = 'block';
+        }
+    });
+
+    // Cierra el menú si se hace clic fuera de él
+    window.addEventListener('click', (event) => {
+        if (!toggleButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+            dropdownMenu.style.display = 'none';
+        }
+    });
+});
+        //LIBRERIAS
+   
+    
+        // Crear el mapa y centrarlo
+        var map = L.map('map').setView([38.513, -0.676], 15);
+
+        // Cargar la capa de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Crear un icono personalizado para el marcador
+        var customIcon = L.divIcon({
+            className: 'custom-icon',
+            iconSize: [32, 32]
+        });
+
+        // Lista de coordenadas
+        var coordinates = [
+            [38.50885187349147, -0.6772767292248638],
+            [38.50891653177661, -0.6770681880135843],
+            [38.50903078054457, -0.6769393559932824],
+            [38.50914959950165, -0.6768887577642158],
+            [38.50942882659514, -0.6768469615903738],
+            [38.50972039363053, -0.6767797200557335],
+            [38.50989022076159, -0.676752125071296],
+            [38.50997470878553, -0.6767666368126946],
+            [38.51004953401663, -0.6768148825253195],
+            [38.51009874530019, -0.6768948850685597],
+            [38.51012902978276, -0.6769645895373766],
+            [38.5101684109009, -0.6771911937909481],
+            [38.5101854825775, -0.6772528303924308],
+            [38.5103253472687, -0.6774534420119271],
+            [38.51038997889994, -0.6775331856241906],
+            [38.51040937667132, -0.6776005121106865],
+            [38.51042175113975, -0.6776530329240948],
+            [38.51043790755965, -0.6777577574594984],
+            [38.51053239923294, -0.6780491188198268],
+            [38.51060566121576, -0.6782402622816852],
+            [38.51063634755005, -0.6782902912388122],
+            [38.51079099595708, -0.6784129643418679],
+            [38.51090488444374, -0.6784630058991759],
+            [38.5110053785716, -0.6784444891857033],
+            [38.51118384939861, -0.6783379205147655],
+            [38.51137396985879, -0.6781601316354169],
+            [38.51157630092887, -0.6780294678641241],
+            [38.51178014122834, -0.677941774137234],
+            [38.51199313520875, -0.6778890600059639],
+            [38.51220092971722, -0.6778734348125248],
+            [38.51230479292757, -0.6778794776146735],
+            [38.51247738696789, -0.677941300510756],
+            [38.51266801154465, -0.678004545000821],
+            [38.51282939210985, -0.6780180272588709],
+            [38.51292558297045, -0.6779902205240762],
+            [38.51309560275516, -0.6779353759917506],
+            [38.51321583089263, -0.6778414383406528],
+            [38.51329128683741, -0.6777287852328506],
+            [38.5133788591689, -0.6775506948645882],
+            [38.51345182478136, -0.6773655573798754],
+            [38.5135695208479, -0.6771317085889739],
+            [38.51367572290936, -0.6769746745204752],
+            [38.51374902993847, -0.6768858764541752],
+            [38.51387247824891, -0.6768081319664276],
+            [38.51398783407576, -0.6767989648774897],
+            [38.51419496299658, -0.6768202308929383],
+            [38.51458521026104, -0.676956274653685],
+            [38.51590625892417, -0.6772314525050205],
+            [38.51610635125402, -0.6773172261911342],
+            [38.5163423802838, -0.6773431608956482],
+            [38.51664773418542, -0.6773306149261749],
+            [38.51680587790188, -0.6772674342745544],
+            [38.516903080928, -0.6772010283161323],
+            [38.51702813456518, -0.6771568398746663],
+            [38.51711238437788, -0.6771613862016612],
+            [38.51717727800556, -0.6771777436798532],
+            [38.51728342069637, -0.6772480184094087]
+        ];
+
+        // Agregar la línea poligonal
+        L.polyline(coordinates, {color: 'blue'}).addTo(map);
+
+        // Agregar marcadores con la imagen personalizada
+        L.marker(coordinates[0], {icon: customIcon}).addTo(map)
+            .bindPopup('RETURN<span class="parpadeante">.</span>', {className: 'popup-text'})
+            .openPopup();
+        L.marker(coordinates[coordinates.length - 1], {icon: customIcon}).addTo(map)
+            .bindPopup('START<span class="parpadeante">.</span>', {className: 'popup-text'});
+   
+    </script>
+     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+</body>
+</html>

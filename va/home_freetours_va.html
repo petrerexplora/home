@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petrer Explora</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<style>
+/* Reseteo de márgenes, relleno y box-sizing para todos los elementos */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Contenedor del fondo de píxeles */
+.pixel-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Estilo para cada píxel */
+.pixel {
+    position: left;
+    width: 3px;
+    height: 3px;
+    background: lime;
+    opacity: 0;
+    animation: explode 3s ease-out infinite;
+}
+
+/* Definición de la animación de explosión */
+@keyframes explode {
+    0% {
+        opacity: 1;
+        transform: scale(1) translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(5) translate(var(--x), var(--y));
+    }
+}
+
+/* Estilos generales del body */
+body {
+    font-family: 'Press Start 2P', cursive;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+    background-size: cover;
+    background-position: center;
+}
+
+/* Estilos del encabezado */
+header {
+    background-color: black;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #00ff00;
+}
+
+/* Estilos del logo en la navegación */
+nav .logo {
+    font-size: 1.8rem;
+}
+
+/* Estilos de las redes sociales */
+.social-media {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap; /* Permite que los elementos se ajusten en múltiples líneas */
+}
+
+.social-media img {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.social-media img:hover {
+    transform: scale(1.2);
+}
+
+/* Estilos del main */
+main {
+    flex: 1;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+}
+
+/* Estilos de las secciones */
+section {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 800px;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border: 2px solid #00ff00;
+}
+
+/* Efecto hover en las secciones */
+section:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 16px rgba(0, 0, 0, 0.7);
+}
+
+/* Estilos del contenido de las secciones */
+section .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Estilos de las imágenes dentro del contenido */
+section .content img {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    border: 2px solid #00ff00;
+}
+
+/* Estilos de los encabezados h2 */
+h2 {
+    color: #00ff00;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #00ff00;
+    padding-bottom: 0.5rem;
+    position: relative;
+    animation: glitch 3s infinite;
+}
+
+/* Definición de la animación de glitch */
+@keyframes glitch {
+    2%, 64% {
+        text-shadow: 0 0 5px #05f02d;
+    }
+    4%, 60% {
+        text-shadow: 0 0 4px #e100ff;
+    }
+    6%, 58% {
+        text-shadow: 5 0 0px #05f02d;
+    }
+    8%, 56% {
+        text-shadow: 0 0 5px #c300ff;
+    }
+    10%, 54% {
+        text-shadow: 0 0 5px #05f02d;
+    }
+}
+
+/* Pseudo-elemento antes de h2 */
+h2::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 50px;
+    height: 4px;
+    background-color: #00cc00;
+    border-radius: 2px;
+}
+/*estilo del titulillo*/
+h3 {
+            font-size: 1rem; /* Tamaño de fuente */
+            margin-bottom: 0.5rem; /* Espacio inferior */
+            padding: 1rem; /* Espaciado interno */
+            font-family: 'Press Start 2P', cursive;
+            line-height: 1.5; /* Ajusta la altura de la línea */
+            text-align: center; /* Centra el texto horizontalmente */
+        }
+/* Estilos de los párrafos */
+p {
+    line-height: 1.6;
+    color: #c0c0c0;
+}
+
+/* Estilos de los artículos del blog */
+.blog article {
+    background-color: rgba(0, 0, 0, 0);
+    margin: 1rem 0;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border: 2px solid #00ff00;
+}
+
+/* Efecto hover en los artículos del blog */
+.blog article:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 50px 50px rgba(0, 0, 0, 0.7);
+}
+
+/* Estilos de los encabezados h3 en el blog */
+.blog article h3 {
+    color: #00cc00;
+    margin-bottom: 0.5rem;
+}
+
+/* Estilos de las imágenes en el blog */
+.blog article img {
+    width: 100%;
+    max-width: 600px;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    border: 2px solid #00ff00;
+}
+
+/* Estilos de los párrafos en el blog */
+.blog article p {
+    color: #c0c0c0;
+}
+
+/* Estilos del botón de inicio */
+.start-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #00dd00;
+    color: #fff;
+    font-size: 32px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Efecto hover en el botón de inicio */
+.start-button:hover {
+    background-color: #5c005f;
+}
+
+/* Efecto active en el botón de inicio */
+.start-button:active {
+    background-color: #c41bd4;
+}
+
+/* Estilos del pie de página */
+footer {
+    background-color: #000;
+    color: #00ff00;
+    text-align: center;
+    padding: 1rem;
+    border-top: 2px solid #00ff00;
+}
+
+/* Selector de idiomas */
+.language-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap; /* Permite que los elementos se ajusten en múltiples líneas */
+    margin-bottom: 1rem;
+}
+
+/* Estilos de las imágenes en el selector de idiomas */
+.language-selector img {
+    width: 30px;
+    height: 30px;
+    margin: 10px;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+/* Efecto hover en las imágenes del selector de idiomas */
+.language-selector img:hover {
+    transform: scale(1.2);
+}
+
+/* Estilos del botón de silencio */
+#botonSilencio {
+    background: none;
+    border: none;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Estilos de la imagen del botón de silencio */
+#botonSilencio img {
+    width: 30px;
+    height: 30px;
+    transition: transform 0.3s;
+}
+
+/* Efecto hover en la imagen del botón de silencio */
+#botonSilencio img:hover {
+    transform: scale(1.2);
+}
+
+/*buscador */
+.fixed-img {
+    position: fixed;
+    bottom: 20px; /* Ajusta el espacio desde el borde inferior */
+    right: 20px;  /* Ajusta el espacio desde el borde derecho */
+    z-index: 1000; /* Asegura que esté encima de otros elementos */
+}
+
+.fixed-img img {
+    width: 50px; /* Ajusta el tamaño de la imagen */
+    height: auto;
+    cursor: pointer; /* Cambia el cursor al pasar sobre la imagen */
+}
+.fixed-img:hover {
+    transform: translateY(-10px); /* Mueve la sección hacia arriba al pasar el ratón */
+    box-shadow: 0 12px 16px rgba(0, 0, 0, 0.7); /* Aumenta la sombra al pasar el ratón */
+}
+
+.dropdown-menu {
+    display: none; /* Oculta el menú por defecto */
+    position: absolute;
+    bottom: 60px; /* Ajusta para que el menú esté encima de la imagen */
+    right: 0;
+    background-color: #000000;
+    border: 1px solid #000000;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    z-index: 1001; /* Asegura que el menú esté encima de otros elementos */
+}
+
+/* Estilos para los enlaces dentro del menú desplegable */
+.dropdown-menu a {
+    display: block;  /* Asegura que los enlaces se muestren como bloques, ocupando todo el ancho disponible */
+    padding: 10px;   /* Añade un espacio interno de 10px alrededor del contenido del enlace */
+    text-decoration: none;  /* Elimina el subrayado del texto del enlace */
+    color: #FFF;  /* Establece el color del texto del enlace */
+    transition: all 0.3s ease;  /* Añade una transición suave para todos los cambios de estilo */
+    font-family: 'Press Start 2P', cursive;  /* Establece la fuente para los enlaces */
+    font-size: 1.2rem; /* Tamaño de fuente */
+    border-radius: 5px;  /* Añade bordes redondeados a los enlaces */
+    border: 2px solid #00ff00; /* Borde verde */
+}
+
+/* Estilos para los enlaces cuando el usuario pasa el ratón por encima */
+.dropdown-menu a:hover {
+    background-color: #f0f0f0;  /* Cambia el color de fondo del enlace al pasar el ratón por encima */
+    color: #007BFF;  /* Cambia el color del texto al pasar el ratón por encima */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Añade una sombra para darle un efecto de elevación */
+}
+
+/* Estilos para el menú desplegable */
+.dropdown-menu {
+    background:#000 ;  /* Añade un degradado suave al fondo del menú */
+    border: 2px solid #00ff00;  /* Añade un borde sutil alrededor del menú */
+    border-radius: 8px;  /* Bordes redondeados para el menú */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);  /* Sombra suave para dar un efecto flotante */
+    padding: 10px;  /* Añade un espacio interno al menú */
+}
+.dropdown-menu img {
+    max-width: 360px;  /* Máximo ancho de la imagen */
+    max-height: 405px;  /* Máximo alto de la imagen */
+    width: auto;  /* Ancho automático para mantener la proporción */
+    height: auto;  /* Alto automático para mantener la proporción */
+    margin: 0 auto;  /* Centramos la imagen horizontalmente */
+}
+/* Definición de la animación 'parpadeo' */
+@keyframes parpadeo {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+.dropdown-menu span{
+    animation: parpadeo 3s infinite;
+}
+
+/* Diseño responsivo para pantallas pequeñas */
+@media (max-width: 600px) {
+    nav .logo {
+        font-size: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+    }
+
+    main {
+        padding: 1rem;
+    }
+
+    section {
+        padding: 1rem;
+    }
+
+    .blog article {
+        padding: 1rem;
+    }
+
+    .social-media {
+        gap: 0.5rem;
+    }
+
+    .social-media img {
+        width: 25px;
+        height: 25px;
+    }
+
+    .language-selector img {
+        width: 25px;
+        height: 25px;
+        margin: 5px;
+    }
+
+    .start-button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+</style>
+
+
+
+<body>
+    <div class="pixel-container"></div>
+    <header>
+        <nav>
+            <div class="logo">Petrer Explora</div>
+            </nav>
+            <div class="social-media">
+                <a href="https://www.facebook.com" target="_blank">
+                    <img src="../img/facebook-logo.png" alt="Facebook">
+                </a>
+                <a href="https://www.instagram.com" target="_blank">
+                    <img src="../img/INSTAGRAMER.png" alt="Instagram">
+                </a>
+            </div>
+        
+    </header>
+
+    <main>
+           <section id="settings" class="follow">
+            <h2>free-tour</h2>
+            <div class="language-selector">
+                <a  href="../es/home_freetour_es.html ">
+                    <img src="../img/es.png" alt="español" title="Español"  >
+                </a>
+                <a  href="">
+                    <img src="../img/va.png" alt="Valencia" title="Valencia">
+                </a>    
+                <a  href="../en/home_freetour_en.html ">
+                    <img src="../img/en.png" alt="English" title="English">
+                </a>
+                <a  href="../de/home_freetour_de.html ">    
+                    <img src="../img/de.png" alt="Deutsch" title="Deutsch">
+                </a>
+            </div>
+            <button id="botonSilencio">
+                <img src="../img/volumen-icono.png" alt="Silenciar Música">
+            </button>
+            <audio id="musica" src="../audio/pixelofi.mp3" autoplay loop></audio>
+            <h3>Descobreix rutes, tours, història i màgia, tot de forma gratuïta i sense cost <span>!</span></h3>
+        </section>
+        
+        <section id="alacran">
+            <h2>Ruta de l'alacran _ Lv1</h2>
+            <div class="content">
+                <img src="../img/alacranintro.jpg" alt="Free Tour">
+                <p>Explora uns dels animals més antics de la Terra.</p> <p>ruta nocturna.</p><br>
+                <button class="start-button" onclick="window.location.href='blog_freetour_va/blog_alacran_va.html'">
+                    <span>START</span>
+                </button>
+            </div>
+        </section>
+       </main>
+       <!-- -->
+<!-- Imagen fija con el menú desplegable  -->
+<div class="fixed-img">
+    <img src="../img/brujula.png" alt="Imagen Desplegable" title="brujula" id="toggleButton">
+    <div id="dropdownMenu" class="dropdown-menu">
+        
+        <img  src="../img/guia.png" alt="">
+        <a id="mensaje">De vegades, retrocedir és la manera més valenta d'avançar<span>!</span></a>
+        <a  href="home_es.html" onclick="manejarClick(event)"><span>tornar enrere!</span></a>
+    </div>
+    </div>
+</div>
+        
+    <footer>
+        <p>&copy; 2024 Petrer Explora</p>
+    </footer>
+    <script>
+        const numPixels = 1000; // Número de píxeles que se generarán
+
+        for (let i = 0; i < numPixels; i++) {
+            // Crear un elemento div para cada píxel
+            const pixel = document.createElement('div');
+            pixel.classList.add('pixel'); // Añadir la clase 'pixel' al elemento
+            document.querySelector('.pixel-container').appendChild(pixel); // Añadir el píxel al contenedor de píxeles
+
+            // Posición inicial aleatoria en la pantalla
+            const startX = Math.random() * window.innerWidth;
+            const startY = Math.random() * window.innerHeight;
+
+            // Desplazamiento aleatorio para la animación
+            const endX = (Math.random() - 0.5) * 200; // Desplazamiento horizontal
+            const endY = (Math.random() - 0.5) * 200; // Desplazamiento vertical
+
+            // Establecer la posición inicial del píxel
+            pixel.style.left = `${startX}px`;
+            pixel.style.top = `${startY}px`;
+
+            // Establecer variables CSS personalizadas para el desplazamiento
+            pixel.style.setProperty('--x', `${endX}px`);
+            pixel.style.setProperty('--y', `${endY}px`);
+
+            // Añadir un retraso aleatorio a la animación
+            pixel.style.animationDelay = `${Math.random() * 3}s`;
+        }
+
+        const botonSilencio = document.getElementById('botonSilencio');
+        const musica = document.getElementById('musica');
+        const volumenIcono = '../img/volumen-icono.png'; // Ruta de la imagen de volumen
+        const silencioIcono = '../img/silencio-icono.png'; // Ruta de la imagen de silencio
+
+        document.addEventListener('click', function() {
+            if (musica.paused) {
+                musica.play(); // Reproducir la música si está pausada
+            }
+        }, { once: true });
+
+        botonSilencio.addEventListener('click', function() {
+            if (musica.paused) {
+                musica.play(); // Reproducir la música si está pausada
+                botonSilencio.querySelector('img').src = volumenIcono;
+            } else {
+                musica.pause(); // Pausar la música si está reproduciéndose
+                botonSilencio.querySelector('img').src = silencioIcono;
+            }
+        });
+         // buscador para navegar
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleButton = document.getElementById('toggleButton');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+
+    toggleButton.addEventListener('click', () => {
+        // Alterna la visibilidad del menú desplegable
+        if (dropdownMenu.style.display === 'block') {
+            dropdownMenu.style.display = 'none';
+        } else {
+            dropdownMenu.style.display = 'block';
+        }
+    });
+
+    // Cierra el menú si se hace clic fuera de él
+    window.addEventListener('click', (event) => {
+        if (!toggleButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+            dropdownMenu.style.display = 'none';
+        }
+    });
+});
+    //HISTORIA NPC
+    let clicCount = 0; // Contador de clics
+
+function manejarClick(event) {
+    event.preventDefault(); // Evita la acción por defecto del enlace
+
+    const mensaje = document.getElementById('mensaje');
+    
+    clicCount++; // Incrementa el contador de clics
+
+    if (clicCount === 1) {
+        // Cambia el texto del enlace en el primer clic
+        mensaje.innerHTML = 'Cada pausa és una oportunitat per observar i descobrir allò que t envolta <span>.</span>';
+    } else if (clicCount === 2) {
+        // Redirige al hacer clic por segunda vez
+        window.location.href = 'home_va.html';
+    }
+}
+
+        // Ejemplo de cómo agregar un listener de eventos en JavaScript si prefieres no usar 'onclick' directamente en HTML
+        //document.querySelector('.start-button').addEventListener('click', function() {
+          //  window.location.href = 'blog_freetour_es/blog_alacran.html';
+       // });
+    </script>
+</body>
+</html>
